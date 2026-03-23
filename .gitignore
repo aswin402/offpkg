@@ -1,0 +1,25 @@
+/.zencoder
+/.zenflow
+
+# ── release binaries ──────────────────────────────────────────────
+offpkg-linux-*
+offpkg-macos-*
+offpkg-windows-*
+*.exe
+ 
+ # ── release binaries ──────────────────────────────────────────────
+offpkg-linux-*
+offpkg-macos-*
+offpkg-windows-*
+*.exe
+ 
+
+# ── offpkg local data ─────────────────────────────────────────────
+# never commit your personal cache, docs, stacks, or DB
+~/.offpkg/
+.offpkg/
+
+
+# ── Rust build output ─────────────────────────────────────────────
+/target/
+Cargo.lock
