@@ -1,7 +1,7 @@
+use crate::config::Config;
 use anyhow::{anyhow, Result};
 use rusqlite::{params, Connection, Result as SqlResult};
 use serde::{Deserialize, Serialize};
-use crate::config::Config;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Package {
@@ -43,8 +43,7 @@ impl Database {
                 value TEXT
             );",
         )?;
-        let integrity: String =
-            conn.query_row("PRAGMA integrity_check", [], |row| row.get(0))?;
+        let integrity: String = conn.query_row("PRAGMA integrity_check", [], |row| row.get(0))?;
         if integrity != "ok" {
             return Err(anyhow!("DB integrity check failed: {}", integrity));
         }
@@ -57,9 +56,13 @@ impl Database {
                 (name, version, runtime, cache_path, checksum, size_bytes, cached_at)
              VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
             params![
-                pkg.name, pkg.version, pkg.runtime,
-                pkg.cache_path, pkg.checksum,
-                pkg.size_bytes, pkg.cached_at
+                pkg.name,
+                pkg.version,
+                pkg.runtime,
+                pkg.cache_path,
+                pkg.checksum,
+                pkg.size_bytes,
+                pkg.cached_at
             ],
         )?;
         Ok(())
@@ -125,7 +128,12 @@ impl Database {
     }
 
     /// Delete a specific version
-    pub fn delete_package_version(&self, name: &str, version: &str, runtime: &str) -> Result<usize> {
+    pub fn delete_package_version(
+        &self,
+        name: &str,
+        version: &str,
+        runtime: &str,
+    ) -> Result<usize> {
         let count = self.conn.execute(
             "DELETE FROM packages WHERE name = ?1 AND version = ?2 AND runtime = ?3",
             params![name, version, runtime],
@@ -134,22 +142,23 @@ impl Database {
     }
 
     pub fn count_packages(&self) -> Result<i64> {
-        let count: i64 =
-            self.conn.query_row("SELECT COUNT(*) FROM packages", [], |row| row.get(0))?;
+        let count: i64 = self
+            .conn
+            .query_row("SELECT COUNT(*) FROM packages", [], |row| row.get(0))?;
         Ok(count)
     }
 }
 
 fn row_to_package(row: &rusqlite::Row) -> SqlResult<Package> {
     Ok(Package {
-        id:         row.get(0)?,
-        name:       row.get(1)?,
-        version:    row.get(2)?,
-        runtime:    row.get(3)?,
+        id: row.get(0)?,
+        name: row.get(1)?,
+        version: row.get(2)?,
+        runtime: row.get(3)?,
         cache_path: row.get(4)?,
-        checksum:   row.get(5)?,
+        checksum: row.get(5)?,
         size_bytes: row.get(6)?,
-        cached_at:  row.get(7)?,
+        cached_at: row.get(7)?,
     })
 }
 

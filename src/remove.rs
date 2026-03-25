@@ -1,7 +1,7 @@
+use crate::db::Database;
+use crate::tui::{Label, TUI};
 use anyhow::{anyhow, Result};
 use std::fs;
-use crate::db::Database;
-use crate::tui::{TUI, Label};
 
 /// Remove a package from the offpkg cache.
 /// Deletes the file from disk and the DB record.
@@ -16,7 +16,8 @@ pub fn remove_from_cache(tui: &mut TUI, db: &Database, pkg: &str, runtime: &str)
         drop(spinner);
         return Err(anyhow!(
             "'{}' ({}) is not in the offpkg cache — nothing to remove.",
-            pkg, runtime
+            pkg,
+            runtime
         ));
     }
 
@@ -28,8 +29,7 @@ pub fn remove_from_cache(tui: &mut TUI, db: &Database, pkg: &str, runtime: &str)
         let path = std::path::Path::new(&p.cache_path);
         if path.exists() {
             let size = fs::metadata(path).map(|m| m.len()).unwrap_or(0);
-            fs::remove_file(path)
-                .map_err(|e| anyhow!("Failed to delete {:?}: {}", path, e))?;
+            fs::remove_file(path).map_err(|e| anyhow!("Failed to delete {:?}: {}", path, e))?;
             total_freed += size;
             tui.print_line(
                 Label::Cache,

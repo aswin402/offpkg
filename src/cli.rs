@@ -1,7 +1,11 @@
 use clap::{Parser, Subcommand};
 
 #[derive(Parser)]
-#[command(name = "offpkg", version = "0.1.0", about = "Universal offline package manager")]
+#[command(
+    name = "offpkg",
+    version = "0.1.0",
+    about = "Universal offline package manager"
+)]
 pub struct Args {
     #[command(subcommand)]
     pub command: Command,
@@ -75,23 +79,15 @@ pub enum StackSubcommand {
     /// Interactively create a new custom stack
     New,
     /// Cache all packages in a stack globally (needs internet, run once)
-    Install {
-        name: String,
-    },
+    Install { name: String },
     /// Add a stack to the current project (fully offline)
-    Add {
-        name: String,
-    },
+    Add { name: String },
     /// List all available stacks
     List,
     /// Show what a stack contains
-    Show {
-        name: String,
-    },
+    Show { name: String },
     /// Delete a custom stack
-    Delete {
-        name: String,
-    },
+    Delete { name: String },
 }
 
 #[derive(Subcommand, Clone, Debug)]

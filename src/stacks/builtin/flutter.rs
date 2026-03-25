@@ -2,7 +2,7 @@ use crate::stacks::{Stack, StackFile};
 
 pub fn flutter_riverpod(app_name: Option<&str>) -> Stack {
     let name = app_name.unwrap_or("my_app").to_string();
-    
+
     // Nice title: "MyApp", "TodoApp", etc.
     let title = app_name
         .map(|s| {
@@ -25,6 +25,7 @@ pub fn flutter_riverpod(app_name: Option<&str>) -> Stack {
             "google_fonts".into(),
         ],
         dev_packages: vec![],
+        transitive_packages: vec![],
         files: vec![
             // ==================== MAIN ====================
             StackFile {
@@ -302,7 +303,3 @@ class HomePage extends StatelessWidget {
         ],
     }
 }
-
-
-
-

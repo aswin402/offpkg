@@ -1,13 +1,16 @@
-use anyhow::{anyhow, Result};
-use crate::cache::{Cache, compute_sha256};
+use crate::cache::{compute_sha256, Cache};
 use crate::config::Config;
 use crate::db::{Database, Package};
 use crate::tui::{Label, TUI};
+use anyhow::{anyhow, Result};
 
 /// Check latest version from npm registry
 async fn latest_npm(pkg: &str) -> Result<(String, String)> {
     let url = format!("https://registry.npmjs.org/{}/latest", pkg);
-    let resp = reqwest::get(&url).await?.json::<serde_json::Value>().await?;
+    let resp = reqwest::get(&url)
+        .await?
+        .json::<serde_json::Value>()
+        .await?;
     let version = resp["version"]
         .as_str()
         .ok_or_else(|| anyhow!("No version for '{}'", pkg))?
@@ -22,7 +25,10 @@ async fn latest_npm(pkg: &str) -> Result<(String, String)> {
 /// Check latest version from PyPI
 async fn latest_pypi(pkg: &str) -> Result<(String, String)> {
     let url = format!("https://pypi.org/pypi/{}/json", pkg);
-    let resp = reqwest::get(&url).await?.json::<serde_json::Value>().await?;
+    let resp = reqwest::get(&url)
+        .await?
+        .json::<serde_json::Value>()
+        .await?;
     let version = resp["info"]["version"]
         .as_str()
         .ok_or_else(|| anyhow!("No version for '{}'", pkg))?
@@ -31,8 +37,20 @@ async fn latest_pypi(pkg: &str) -> Result<(String, String)> {
     let urls = resp["urls"].as_array().unwrap_or(&empty);
     let tarball = urls
         .iter()
-        .find(|u| u["filename"].as_str().map(|f| f.ends_with(".whl")).unwrap_or(false))
-        .or_else(|| urls.iter().find(|u| u["filename"].as_str().map(|f| f.ends_with(".tar.gz")).unwrap_or(false)))
+        .find(|u| {
+            u["filename"]
+                .as_str()
+                .map(|f| f.ends_with(".whl"))
+                .unwrap_or(false)
+        })
+        .or_else(|| {
+            urls.iter().find(|u| {
+                u["filename"]
+                    .as_str()
+                    .map(|f| f.ends_with(".tar.gz"))
+                    .unwrap_or(false)
+            })
+        })
         .and_then(|u| u["url"].as_str())
         .ok_or_else(|| anyhow!("No download URL for '{}'", pkg))?
         .to_string();
@@ -42,12 +60,18 @@ async fn latest_pypi(pkg: &str) -> Result<(String, String)> {
 /// Check latest version from pub.dev
 async fn latest_pubdev(pkg: &str) -> Result<(String, String)> {
     let url = format!("https://pub.dev/api/packages/{}", pkg);
-    let resp = reqwest::get(&url).await?.json::<serde_json::Value>().await?;
+    let resp = reqwest::get(&url)
+        .await?
+        .json::<serde_json::Value>()
+        .await?;
     let version = resp["latest"]["version"]
         .as_str()
         .ok_or_else(|| anyhow!("No version for '{}'", pkg))?
         .to_string();
-    let tarball = format!("https://pub.dev/packages/{}/versions/{}.tar.gz", pkg, version);
+    let tarball = format!(
+        "https://pub.dev/packages/{}/versions/{}.tar.gz",
+        pkg, version
+    );
     Ok((version, tarball))
 }
 
@@ -61,10 +85,10 @@ pub async fn update_package(
 ) -> Result<bool> {
     // Check latest version from registry
     let (latest_version, tarball_url) = match pkg.runtime.as_str() {
-        "bun"     => latest_npm(&pkg.name).await?,
-        "uv"      => latest_pypi(&pkg.name).await?,
+        "bun" => latest_npm(&pkg.name).await?,
+        "uv" => latest_pypi(&pkg.name).await?,
         "flutter" => latest_pubdev(&pkg.name).await?,
-        _         => return Err(anyhow!("Unknown runtime: {}", pkg.runtime)),
+        _ => return Err(anyhow!("Unknown runtime: {}", pkg.runtime)),
     };
 
     // Already up to date?
@@ -154,7 +178,11 @@ pub async fn run_update(
     let total = targets.len();
     tui.print_line(
         Label::Info,
-        &format!("checking {} package{} for updates", total, if total == 1 { "" } else { "s" }),
+        &format!(
+            "checking {} package{} for updates",
+            total,
+            if total == 1 { "" } else { "s" }
+        ),
         Some("docs will NOT be changed"),
     );
     println!();
@@ -165,7 +193,7 @@ pub async fn run_update(
 
     for pkg in &targets {
         match update_package(tui, db, cache, pkg).await {
-            Ok(true)  => updated += 1,
+            Ok(true) => updated += 1,
             Ok(false) => up_to_date += 1,
             Err(e) => {
                 tui.print_line(
@@ -181,7 +209,12 @@ pub async fn run_update(
     println!();
     tui.print_line(
         Label::Done,
-        &format!("{} updated · {} up to date · {} failed", updated, up_to_date, failed.len()),
+        &format!(
+            "{} updated · {} up to date · {} failed",
+            updated,
+            up_to_date,
+            failed.len()
+        ),
         None,
     );
 

@@ -1,7 +1,7 @@
+use crate::config::Config;
 use anyhow::{anyhow, Result};
 use std::fs;
 use std::path::{Path, PathBuf};
-use crate::config::Config;
 
 #[derive(Clone)]
 pub struct DocsStore {
@@ -57,7 +57,9 @@ impl DocsStore {
         if !global_path.exists() {
             return Err(anyhow!(
                 "No docs found for '{}'. Run: offpkg {} install {}",
-                pkg, runtime, pkg
+                pkg,
+                runtime,
+                pkg
             ));
         }
 
@@ -79,7 +81,10 @@ impl DocsStore {
         if !path.exists() {
             return Err(anyhow!(
                 "No docs cached for '{}' ({}).\nRun: offpkg {} install {}",
-                pkg, runtime, runtime, pkg
+                pkg,
+                runtime,
+                runtime,
+                pkg
             ));
         }
         Ok(fs::read_to_string(path)?)
@@ -92,18 +97,25 @@ impl DocsStore {
         if !doc_path.exists() {
             return Err(anyhow!(
                 "No docs found for '{}'. Run: offpkg {} install {} first.",
-                pkg, runtime, pkg
+                pkg,
+                runtime,
+                pkg
             ));
         }
 
         let editor = std::env::var("EDITOR").unwrap_or_else(|_| {
             for e in &["nvim", "vim", "nano", "code", "gedit"] {
-                if which_available(e) { return e.to_string(); }
+                if which_available(e) {
+                    return e.to_string();
+                }
             }
             "nano".to_string()
         });
 
-        println!("opening ~/.offpkg/docs/{}/{}.md in {}...", runtime, pkg, editor);
+        println!(
+            "opening ~/.offpkg/docs/{}/{}.md in {}...",
+            runtime, pkg, editor
+        );
 
         let status = std::process::Command::new(&editor)
             .arg(&doc_path)
@@ -120,7 +132,8 @@ impl DocsStore {
 
 fn which_available(name: &str) -> bool {
     std::process::Command::new("which")
-        .arg(name).output()
+        .arg(name)
+        .output()
         .map(|o| o.status.success())
         .unwrap_or(false)
 }
@@ -129,9 +142,9 @@ fn which_available(name: &str) -> bool {
 pub async fn fetch_docs(runtime: &str, pkg: &str, version: &str) -> Result<String> {
     let result = match runtime {
         "flutter" => fetch_pubdev_docs(pkg, version).await,
-        "bun"     => fetch_npm_docs(pkg, version).await,
-        "uv"      => fetch_pypi_docs(pkg, version).await,
-        _         => Err(anyhow!("Unknown runtime")),
+        "bun" => fetch_npm_docs(pkg, version).await,
+        "uv" => fetch_pypi_docs(pkg, version).await,
+        _ => Err(anyhow!("Unknown runtime")),
     };
     match result {
         Ok(c) if !c.trim().is_empty() => Ok(c),
@@ -141,25 +154,37 @@ pub async fn fetch_docs(runtime: &str, pkg: &str, version: &str) -> Result<Strin
 
 async fn fetch_pubdev_docs(pkg: &str, version: &str) -> Result<String> {
     let resp = reqwest::get(&format!("https://pub.dev/api/packages/{}", pkg))
-        .await?.json::<serde_json::Value>().await?;
+        .await?
+        .json::<serde_json::Value>()
+        .await?;
 
-    let description = resp["latest"]["pubspec"]["description"].as_str().unwrap_or("").to_string();
-    let homepage    = resp["latest"]["pubspec"]["homepage"]
-        .as_str().or_else(|| resp["latest"]["pubspec"]["repository"].as_str())
-        .unwrap_or("").to_string();
-    let likes  = resp["likes"].as_i64().unwrap_or(0);
+    let description = resp["latest"]["pubspec"]["description"]
+        .as_str()
+        .unwrap_or("")
+        .to_string();
+    let homepage = resp["latest"]["pubspec"]["homepage"]
+        .as_str()
+        .or_else(|| resp["latest"]["pubspec"]["repository"].as_str())
+        .unwrap_or("")
+        .to_string();
+    let likes = resp["likes"].as_i64().unwrap_or(0);
     let points = resp["pub_points"].as_i64().unwrap_or(0);
 
     let readme_resp = reqwest::get(&format!(
-        "https://pub.dev/api/packages/{}/versions/{}/readme", pkg, version
-    )).await;
+        "https://pub.dev/api/packages/{}/versions/{}/readme",
+        pkg, version
+    ))
+    .await;
 
     let readme = if let Ok(r) = readme_resp {
-        r.json::<serde_json::Value>().await
+        r.json::<serde_json::Value>()
+            .await
             .ok()
             .and_then(|j| j["content"].as_str().map(|s| s.to_string()))
             .unwrap_or_default()
-    } else { String::new() };
+    } else {
+        String::new()
+    };
 
     let header = format!(
         "# {pkg} — offpkg docs\n\
@@ -177,16 +202,26 @@ async fn fetch_pubdev_docs(pkg: &str, version: &str) -> Result<String> {
          ---\n\n"
     );
 
-    Ok(format!("{}{}", header, if readme.is_empty() { generate_flutter_usage(pkg, version) } else { readme }))
+    Ok(format!(
+        "{}{}",
+        header,
+        if readme.is_empty() {
+            generate_flutter_usage(pkg, version)
+        } else {
+            readme
+        }
+    ))
 }
 
 async fn fetch_npm_docs(pkg: &str, version: &str) -> Result<String> {
     let resp = reqwest::get(&format!("https://registry.npmjs.org/{}", pkg))
-        .await?.json::<serde_json::Value>().await?;
+        .await?
+        .json::<serde_json::Value>()
+        .await?;
 
     let description = resp["description"].as_str().unwrap_or("").to_string();
-    let homepage    = resp["homepage"].as_str().unwrap_or("").to_string();
-    let readme      = resp["readme"].as_str().unwrap_or("").to_string();
+    let homepage = resp["homepage"].as_str().unwrap_or("").to_string();
+    let readme = resp["readme"].as_str().unwrap_or("").to_string();
 
     let header = format!(
         "# {pkg} — offpkg docs\n\
@@ -203,17 +238,30 @@ async fn fetch_npm_docs(pkg: &str, version: &str) -> Result<String> {
          ---\n\n"
     );
 
-    Ok(format!("{}{}", header, if readme.is_empty() { generate_bun_usage(pkg, version) } else { readme }))
+    Ok(format!(
+        "{}{}",
+        header,
+        if readme.is_empty() {
+            generate_bun_usage(pkg, version)
+        } else {
+            readme
+        }
+    ))
 }
 
 async fn fetch_pypi_docs(pkg: &str, version: &str) -> Result<String> {
     let resp = reqwest::get(&format!("https://pypi.org/pypi/{}/json", pkg))
-        .await?.json::<serde_json::Value>().await?;
+        .await?
+        .json::<serde_json::Value>()
+        .await?;
 
     let description = resp["info"]["summary"].as_str().unwrap_or("").to_string();
-    let homepage    = resp["info"]["home_page"].as_str().unwrap_or("").to_string();
-    let docs_url    = resp["info"]["docs_url"].as_str().unwrap_or("").to_string();
-    let long_desc   = resp["info"]["description"].as_str().unwrap_or("").to_string();
+    let homepage = resp["info"]["home_page"].as_str().unwrap_or("").to_string();
+    let docs_url = resp["info"]["docs_url"].as_str().unwrap_or("").to_string();
+    let long_desc = resp["info"]["description"]
+        .as_str()
+        .unwrap_or("")
+        .to_string();
 
     let header = format!(
         "# {pkg} — offpkg docs\n\
@@ -230,16 +278,20 @@ async fn fetch_pypi_docs(pkg: &str, version: &str) -> Result<String> {
          ---\n\n"
     );
 
-    let body = if long_desc.len() > 100 { long_desc } else { generate_uv_usage(pkg, version) };
+    let body = if long_desc.len() > 100 {
+        long_desc
+    } else {
+        generate_uv_usage(pkg, version)
+    };
     Ok(format!("{}{}", header, body))
 }
 
 fn generate_template(runtime: &str, pkg: &str, version: &str) -> String {
     match runtime {
         "flutter" => generate_flutter_usage(pkg, version),
-        "bun"     => generate_bun_usage(pkg, version),
-        "uv"      => generate_uv_usage(pkg, version),
-        _         => format!("# {pkg} v{version}\n\nNo docs available.\n"),
+        "bun" => generate_bun_usage(pkg, version),
+        "uv" => generate_uv_usage(pkg, version),
+        _ => format!("# {pkg} v{version}\n\nNo docs available.\n"),
     }
 }
 

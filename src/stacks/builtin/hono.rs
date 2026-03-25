@@ -6,10 +6,15 @@ pub fn hono_api() -> Stack {
         runtime: "bun".into(),
         description: "Hono API with Bun and Pino logger".into(),
         packages: vec!["hono".into(), "pino".into()],
-        dev_packages: vec!["typescript".into(), "@types/node".into(), "pino-pretty".into()],
+        dev_packages: vec![
+            "typescript".into(),
+            "@types/node".into(),
+            "pino-pretty".into(),
+        ],
+        transitive_packages: vec![],
         files: vec![
-            StackFile { 
-                path: "src/server.ts".into(), 
+            StackFile {
+                path: "src/server.ts".into(),
                 content: r##"import { Hono } from "hono";
 import { logger as httpLogger } from "hono/logger";
 import { logger } from "./utils/logger";
@@ -24,7 +29,8 @@ export default {
   port: PORT,
   fetch: app.fetch,
 };
-"##.into(),
+"##
+                .into(),
                 binary_content: None,
             },
             StackFile {
@@ -44,7 +50,8 @@ export const logger = pino({
     },
   } : undefined,
 });
-"##.into(),
+"##
+                .into(),
                 binary_content: None,
             },
         ],
@@ -73,6 +80,7 @@ pub fn hono_full() -> Stack {
             "prisma@^5.15.0".into(),
             "@types/pg@^8.11.6".into(),
         ],
+        transitive_packages: vec![],
         files: vec![
             StackFile {
                 path: "package.json".into(),
@@ -250,5 +258,3 @@ export { prisma }
         ],
     }
 }
-
-

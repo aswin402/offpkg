@@ -4,7 +4,9 @@ pub fn fastapi() -> Stack {
     Stack {
         name: "fastapi".into(),
         runtime: "uv".into(),
-        description: "FastAPI + SQLAlchemy (Async) + Alembic + Pydantic v2 + structlog + Best Practices".into(),
+        description:
+            "FastAPI + SQLAlchemy (Async) + Alembic + Pydantic v2 + structlog + Best Practices"
+                .into(),
         packages: vec![
             "fastapi".into(),
             "uvicorn".into(),
@@ -17,8 +19,8 @@ pub fn fastapi() -> Stack {
             "python-multipart".into(),
         ],
         dev_packages: vec![],
+        transitive_packages: vec![],
         files: vec![
-
             // ── main.py ───────────────────────────────────────────────────────
             StackFile {
                 path: "app/main.py".into(),
@@ -75,10 +77,10 @@ async def health():
 @app.get("/{full_path:path}")
 async def not_found(full_path: str):
     return {"status": 404, "message": "Route not found", "path": f"/{full_path}"}
-"##.into(),
+"##
+                .into(),
                 binary_content: None,
             },
-
             // ── core/config.py ────────────────────────────────────────────────
             StackFile {
                 path: "app/core/config.py".into(),
@@ -100,10 +102,10 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
-"##.into(),
+"##
+                .into(),
                 binary_content: None,
             },
-
             // ── core/logger.py ────────────────────────────────────────────────
             StackFile {
                 path: "app/core/logger.py".into(),
@@ -128,14 +130,15 @@ def setup_logging():
         wrapper_class=structlog.stdlib.BoundLogger,
         cache_logger_on_first_use=True,
     )
-"##.into(),
+"##
+                .into(),
                 binary_content: None,
             },
-
             // ── db/session.py ─────────────────────────────────────────────────
             StackFile {
                 path: "app/db/session.py".into(),
-                content: r##"from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
+                content:
+                    r##"from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from app.core.config import settings
 
 engine = create_async_engine(
@@ -150,10 +153,10 @@ SessionLocal = async_sessionmaker(
     autoflush=False,
     expire_on_commit=False,
 )
-"##.into(),
+"##
+                    .into(),
                 binary_content: None,
             },
-
             // ── db/base.py ────────────────────────────────────────────────────
             StackFile {
                 path: "app/db/base.py".into(),
@@ -163,10 +166,10 @@ SessionLocal = async_sessionmaker(
 class Base(DeclarativeBase):
     """Base class for all SQLAlchemy models"""
     pass
-"##.into(),
+"##
+                .into(),
                 binary_content: None,
             },
-
             // ── db/dependencies.py ────────────────────────────────────────────
             StackFile {
                 path: "app/db/dependencies.py".into(),
@@ -178,10 +181,10 @@ from app.db.session import SessionLocal
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
     async with SessionLocal() as db:
         yield db
-"##.into(),
+"##
+                .into(),
                 binary_content: None,
             },
-
             // ── exceptions/handlers.py ────────────────────────────────────────
             StackFile {
                 path: "app/exceptions/handlers.py".into(),
@@ -203,10 +206,10 @@ def add_exception_handlers(app: FastAPI):
             status_code=404,
             content={"message": "Resource not found"},
         )
-"##.into(),
+"##
+                .into(),
                 binary_content: None,
             },
-
             // ── middleware/request_logging.py ─────────────────────────────────
             StackFile {
                 path: "app/middleware/request_logging.py".into(),
@@ -229,10 +232,10 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
         duration = int((time.perf_counter() - start) * 1000)
         print(f"--> {request.method} {request.url.path} {response.status_code} {duration}ms")
         return response
-"##.into(),
+"##
+                .into(),
                 binary_content: None,
             },
-
             // ── routes/router.py ──────────────────────────────────────────────
             StackFile {
                 path: "app/routes/router.py".into(),
@@ -243,24 +246,47 @@ api_router = APIRouter(prefix="/api/v1")
 # Import and include your feature routers here
 # from app.routes import users
 # api_router.include_router(users.router, prefix="/users", tags=["users"])
-"##.into(),
+"##
+                .into(),
                 binary_content: None,
             },
-
             // ── models/__init__.py ────────────────────────────────────────────
             StackFile {
                 path: "app/models/__init__.py".into(),
-                content: "# Import all models here so Alembic can detect them\n".into(), binary_content: None,
+                content: "# Import all models here so Alembic can detect them\n".into(),
+                binary_content: None,
             },
-
             // ── __init__ files ────────────────────────────────────────────────
-            StackFile { path: "app/__init__.py".into(), content: "".into(), binary_content: None },
-            StackFile { path: "app/core/__init__.py".into(), content: "".into(), binary_content: None },
-            StackFile { path: "app/db/__init__.py".into(), content: "".into(), binary_content: None },
-            StackFile { path: "app/exceptions/__init__.py".into(), content: "".into(), binary_content: None },
-            StackFile { path: "app/middleware/__init__.py".into(), content: "".into(), binary_content: None },
-            StackFile { path: "app/routes/__init__.py".into(), content: "".into(), binary_content: None },
-
+            StackFile {
+                path: "app/__init__.py".into(),
+                content: "".into(),
+                binary_content: None,
+            },
+            StackFile {
+                path: "app/core/__init__.py".into(),
+                content: "".into(),
+                binary_content: None,
+            },
+            StackFile {
+                path: "app/db/__init__.py".into(),
+                content: "".into(),
+                binary_content: None,
+            },
+            StackFile {
+                path: "app/exceptions/__init__.py".into(),
+                content: "".into(),
+                binary_content: None,
+            },
+            StackFile {
+                path: "app/middleware/__init__.py".into(),
+                content: "".into(),
+                binary_content: None,
+            },
+            StackFile {
+                path: "app/routes/__init__.py".into(),
+                content: "".into(),
+                binary_content: None,
+            },
             // ── alembic.ini ───────────────────────────────────────────────────
             StackFile {
                 path: "alembic.ini".into(),
@@ -302,10 +328,10 @@ formatter = generic
 [formatter_generic]
 format = %(levelname)-5.5s [%(name)s] %(message)s
 datefmt = %H:%M:%S
-"##.into(),
+"##
+                .into(),
                 binary_content: None,
             },
-
             // ── alembic/env.py ────────────────────────────────────────────────
             StackFile {
                 path: "alembic/env.py".into(),
@@ -360,10 +386,10 @@ if context.is_offline_mode():
     run_migrations_offline()
 else:
     run_migrations_online()
-"##.into(),
+"##
+                .into(),
                 binary_content: None,
             },
-
             // ── alembic/script.py.mako ────────────────────────────────────────
             StackFile {
                 path: "alembic/script.py.mako".into(),
@@ -390,26 +416,27 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     ${downgrades if downgrades else "pass"}
-"##.into(),
+"##
+                .into(),
                 binary_content: None,
             },
-
             // ── alembic/versions/.gitkeep ─────────────────────────────────────
             StackFile {
                 path: "alembic/versions/.gitkeep".into(),
-                content: "".into(), binary_content: None,
+                content: "".into(),
+                binary_content: None,
             },
-
             // ── .env ──────────────────────────────────────────────────────────
             StackFile {
                 path: ".env".into(),
-                content: r##"DATABASE_URL=postgresql+asyncpg://postgres:postgres@localhost:5432/myapp
+                content:
+                    r##"DATABASE_URL=postgresql+asyncpg://postgres:postgres@localhost:5432/myapp
 ENVIRONMENT=development
 LOG_LEVEL=INFO
-"##.into(),
+"##
+                    .into(),
                 binary_content: None,
             },
-
             // ── justfile ──────────────────────────────────────────────────────
             StackFile {
                 path: "justfile".into(),
@@ -433,16 +460,16 @@ rollback:
 
 reset-db:
     uv run alembic downgrade base && uv run alembic upgrade head
-"##.into(),
+"##
+                .into(),
                 binary_content: None,
             },
-
             // ── uploads/.gitkeep ──────────────────────────────────────────────
             StackFile {
                 path: "uploads/.gitkeep".into(),
-                content: "".into(), binary_content: None,
+                content: "".into(),
+                binary_content: None,
             },
-
             // ── .gitignore ────────────────────────────────────────────────────
             StackFile {
                 path: ".gitignore".into(),
@@ -458,7 +485,8 @@ uploads/*
 alembic/versions/*.py
 !alembic/versions/.gitkeep
 .DS_Store
-"##.into(),
+"##
+                .into(),
                 binary_content: None,
             },
         ],

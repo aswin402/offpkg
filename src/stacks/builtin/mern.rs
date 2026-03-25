@@ -32,6 +32,7 @@ pub fn mern() -> Stack {
             "postcss".into(),
             "autoprefixer".into(),
         ],
+        transitive_packages: vec![],
         files: vec![
             // Backend
             StackFile {
@@ -280,4 +281,3 @@ services:
         ],
     }
 }
-

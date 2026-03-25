@@ -1,32 +1,34 @@
+pub mod cache;
 pub mod cli;
 pub mod config;
 pub mod db;
-pub mod cache;
-pub mod tui;
+pub mod docs;
 pub mod doctor;
 pub mod remove;
-pub mod docs;
 pub mod stacks;
+pub mod tui;
 pub mod update;
 pub mod adapters {
     pub mod bun;
-    pub mod uv;
     pub mod flutter;
+    pub mod uv;
 }
 
+use crate::adapters::bun::BunAdapter;
+use crate::adapters::flutter::FlutterAdapter;
+use crate::adapters::uv::UvAdapter;
+use crate::cache::Cache;
+use crate::cli::{
+    Args, BunSubcommand, Command, DocsSubcommand, FlutterSubcommand, StackSubcommand, UvSubcommand,
+};
+use crate::config::Config;
+use crate::db::Database;
+use crate::docs::{fetch_docs, DocsStore};
+use crate::stacks::StackStore;
+use crate::tui::{Label, TUI};
+use crate::update::run_update;
 use anyhow::{anyhow, Context, Result};
 use clap::Parser;
-use crate::cli::{Args, Command, BunSubcommand, UvSubcommand, FlutterSubcommand, StackSubcommand, DocsSubcommand};
-use crate::config::Config;
-use crate::cache::Cache;
-use crate::db::Database;
-use crate::docs::{DocsStore, fetch_docs};
-use crate::update::run_update;
-use crate::stacks::StackStore;
-use crate::tui::{TUI, Label};
-use crate::adapters::bun::BunAdapter;
-use crate::adapters::uv::UvAdapter;
-use crate::adapters::flutter::FlutterAdapter;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -39,11 +41,14 @@ async fn main() -> Result<()> {
     let stack_store = StackStore::new(config.clone());
 
     match cli.command {
-
         Command::List { runtime } => {
             tui.render_logo();
             let pkgs = db.list_packages(runtime.as_deref())?;
-            tui.print_line(Label::Info, &format!("{} packages found:", pkgs.len()), None);
+            tui.print_line(
+                Label::Info,
+                &format!("{} packages found:", pkgs.len()),
+                None,
+            );
             for pkg in pkgs {
                 tui.print_line(
                     Label::Done,
@@ -59,7 +64,6 @@ async fn main() -> Result<()> {
 
         // ── Stack ─────────────────────────────────────────────────────────
         Command::Stack { subcmd } => match subcmd {
-
             StackSubcommand::List => {
                 tui.render_logo();
                 tui.print_line(Label::Info, "available stacks", None);
@@ -70,17 +74,25 @@ async fn main() -> Result<()> {
                     tui.print_line(
                         Label::Done,
                         &format!("{}", stack.name),
-                        Some(&format!("[{}]  {} packages  {} files  — {}", stack.runtime, total, files, stack.description)),
+                        Some(&format!(
+                            "[{}]  {} packages  {} files  — {}",
+                            stack.runtime, total, files, stack.description
+                        )),
                     );
                 }
             }
 
             StackSubcommand::Show { name } => {
-                let stack = stack_store.find(&name)
+                let stack = stack_store
+                    .find(&name)
                     .ok_or_else(|| anyhow!("Stack '{}' not found. Run: offpkg stack list", name))?;
 
                 println!();
-                tui.print_line(Label::Info, &format!("stack: {}", stack.name), Some(&stack.description));
+                tui.print_line(
+                    Label::Info,
+                    &format!("stack: {}", stack.name),
+                    Some(&stack.description),
+                );
                 tui.print_line(Label::Info, "runtime", Some(&stack.runtime));
                 println!();
                 tui.print_line(Label::Resolve, "packages", None);
@@ -103,7 +115,8 @@ async fn main() -> Result<()> {
             }
 
             StackSubcommand::Install { name } => {
-                let stack = stack_store.find(&name)
+                let stack = stack_store
+                    .find(&name)
                     .ok_or_else(|| anyhow!("Stack '{}' not found. Run: offpkg stack list", name))?;
 
                 let total = stack.packages.len() + stack.dev_packages.len();
@@ -114,7 +127,9 @@ async fn main() -> Result<()> {
                 );
                 println!();
 
-                let all_pkgs: Vec<String> = stack.packages.iter()
+                let all_pkgs: Vec<String> = stack
+                    .packages
+                    .iter()
                     .chain(stack.dev_packages.iter())
                     .cloned()
                     .collect();
@@ -124,8 +139,10 @@ async fn main() -> Result<()> {
 
                 for pkg in &all_pkgs {
                     // Skip if already cached
-                    let already = db.list_packages(Some(&stack.runtime))?
-                        .into_iter().any(|p| p.name == *pkg);
+                    let already = db
+                        .list_packages(Some(&stack.runtime))?
+                        .into_iter()
+                        .any(|p| p.name == *pkg);
 
                     if already {
                         tui.print_line(Label::Cache, pkg, Some("already cached, skipping"));
@@ -135,15 +152,33 @@ async fn main() -> Result<()> {
 
                     let result = match stack.runtime.as_str() {
                         "bun" => {
-                            let mut a = BunAdapter::new(config.clone(), db.clone(), cache.clone(), tui.clone(), docs_store.clone());
+                            let mut a = BunAdapter::new(
+                                config.clone(),
+                                db.clone(),
+                                cache.clone(),
+                                tui.clone(),
+                                docs_store.clone(),
+                            );
                             a.install(pkg).await
                         }
                         "uv" => {
-                            let mut a = UvAdapter::new(config.clone(), db.clone(), cache.clone(), tui.clone(), docs_store.clone());
+                            let mut a = UvAdapter::new(
+                                config.clone(),
+                                db.clone(),
+                                cache.clone(),
+                                tui.clone(),
+                                docs_store.clone(),
+                            );
                             a.install(pkg).await
                         }
                         "flutter" => {
-                            let mut a = FlutterAdapter::new(config.clone(), db.clone(), cache.clone(), tui.clone(), docs_store.clone());
+                            let mut a = FlutterAdapter::new(
+                                config.clone(),
+                                db.clone(),
+                                cache.clone(),
+                                tui.clone(),
+                                docs_store.clone(),
+                            );
                             a.install(pkg).await
                         }
                         _ => Err(anyhow!("Unknown runtime: {}", stack.runtime)),
@@ -152,7 +187,11 @@ async fn main() -> Result<()> {
                     match result {
                         Ok(_) => success += 1,
                         Err(e) => {
-                            tui.print_line(Label::Warn, &format!("failed: {}", pkg), Some(&e.to_string()));
+                            tui.print_line(
+                                Label::Warn,
+                                &format!("failed: {}", pkg),
+                                Some(&e.to_string()),
+                            );
                             failed.push(pkg.clone());
                         }
                     }
@@ -165,13 +204,22 @@ async fn main() -> Result<()> {
                     Some(&format!("{}/{} packages", success, total)),
                 );
                 if !failed.is_empty() {
-                    tui.print_line(Label::Warn, "some packages failed", Some(&failed.join(", ")));
+                    tui.print_line(
+                        Label::Warn,
+                        "some packages failed",
+                        Some(&failed.join(", ")),
+                    );
                 }
-                tui.print_line(Label::Info, "run when offline:", Some(&format!("offpkg stack add {}", name)));
+                tui.print_line(
+                    Label::Info,
+                    "run when offline:",
+                    Some(&format!("offpkg stack add {}", name)),
+                );
             }
 
             StackSubcommand::Add { name } => {
-                let stack = stack_store.find(&name)
+                let stack = stack_store
+                    .find(&name)
                     .ok_or_else(|| anyhow!("Stack '{}' not found. Run: offpkg stack list", name))?;
 
                 let total = stack.packages.len() + stack.dev_packages.len();
@@ -183,7 +231,9 @@ async fn main() -> Result<()> {
                 println!();
 
                 let cwd = std::env::current_dir()?;
-                let all_pkgs: Vec<String> = stack.packages.iter()
+                let all_pkgs: Vec<String> = stack
+                    .packages
+                    .iter()
                     .chain(stack.dev_packages.iter())
                     .cloned()
                     .collect();
@@ -196,25 +246,35 @@ async fn main() -> Result<()> {
                     tui.print_line(Label::Link, f, Some("created"));
                 }
                 if created.is_empty() {
-                    tui.print_line(Label::Info, "all config files already exist", Some("skipped"));
+                    tui.print_line(
+                        Label::Info,
+                        "all config files already exist",
+                        Some("skipped"),
+                    );
                 }
 
                 let mut success = 0;
                 let mut failed: Vec<String> = vec![];
 
-                for pkg in &all_pkgs {
+                let mut run_add = |pkg: &String, skip: bool, dev: bool| {
                     let result = match stack.runtime.as_str() {
                         "bun" => {
-                            let mut a = BunAdapter::new(config.clone(), db.clone(), cache.clone(), tui.clone(), docs_store.clone());
-                            a.add(pkg, true)
+                            let mut a = BunAdapter::new(
+                                config.clone(), db.clone(), cache.clone(), tui.clone(), docs_store.clone(),
+                            );
+                            a.add(pkg, skip, dev)
                         }
                         "uv" => {
-                            let mut a = UvAdapter::new(config.clone(), db.clone(), cache.clone(), tui.clone(), docs_store.clone());
-                            a.add(pkg, true)
+                            let mut a = UvAdapter::new(
+                                config.clone(), db.clone(), cache.clone(), tui.clone(), docs_store.clone(),
+                            );
+                            a.add(pkg, skip, dev)
                         }
                         "flutter" => {
-                            let mut a = FlutterAdapter::new(config.clone(), db.clone(), cache.clone(), tui.clone(), docs_store.clone());
-                            a.add(pkg, true)
+                            let mut a = FlutterAdapter::new(
+                                config.clone(), db.clone(), cache.clone(), tui.clone(), docs_store.clone(),
+                            );
+                            a.add(pkg, skip, dev)
                         }
                         _ => Err(anyhow!("Unknown runtime: {}", stack.runtime)),
                     };
@@ -222,11 +282,19 @@ async fn main() -> Result<()> {
                     match result {
                         Ok(_) => success += 1,
                         Err(e) => {
-                            tui.print_line(Label::Warn, &format!("failed: {}", pkg), Some(&e.to_string()));
+                            tui.print_line(
+                                Label::Warn,
+                                &format!("failed: {}", pkg),
+                                Some(&e.to_string()),
+                            );
                             failed.push(pkg.clone());
                         }
                     }
-                }
+                };
+
+                for pkg in &stack.packages { run_add(pkg, false, false); }
+                for pkg in &stack.dev_packages { run_add(pkg, false, true); }
+                for pkg in &stack.transitive_packages { run_add(pkg, true, false); }
 
                 // Copy stack docs into project
                 for pkg in &all_pkgs {
@@ -239,12 +307,25 @@ async fn main() -> Result<()> {
                 tui.print_line(
                     Label::Done,
                     &format!("stack {} ready", stack.name),
-                    Some(&format!("{}/{} packages · {} files", success, total, created.len())),
+                    Some(&format!(
+                        "{}/{} packages · {} files",
+                        success,
+                        total,
+                        created.len()
+                    )),
                 );
 
                 if !failed.is_empty() {
-                    tui.print_line(Label::Warn, "some packages failed", Some(&failed.join(", ")));
-                    tui.print_line(Label::Info, "run install first:", Some(&format!("offpkg stack install {}", name)));
+                    tui.print_line(
+                        Label::Warn,
+                        "some packages failed",
+                        Some(&failed.join(", ")),
+                    );
+                    tui.print_line(
+                        Label::Info,
+                        "run install first:",
+                        Some(&format!("offpkg stack install {}", name)),
+                    );
                 }
             }
 
@@ -252,47 +333,64 @@ async fn main() -> Result<()> {
                 stack_store.create_interactive()?;
             }
 
-            StackSubcommand::Delete { name } => {
-                match stack_store.delete(&name) {
-                    Ok(_) => {
-                        tui.print_line(Label::Done, &format!("stack '{}' deleted", name), None);
-                    }
-                    Err(e) => {
-                        tui.print_line(Label::Error, &e.to_string(), None);
-                    }
+            StackSubcommand::Delete { name } => match stack_store.delete(&name) {
+                Ok(_) => {
+                    tui.print_line(Label::Done, &format!("stack '{}' deleted", name), None);
                 }
-            }
+                Err(e) => {
+                    tui.print_line(Label::Error, &e.to_string(), None);
+                }
+            },
         },
 
         // ── Docs ──────────────────────────────────────────────────────────
         Command::Docs { subcmd } => match subcmd {
             DocsSubcommand::Edit { pkg, runtime } => {
-                tui.print_line(Label::Info, &format!("opening ~/.offpkg/docs/{}/{}.md", runtime, pkg), Some("edits apply to all future project copies"));
+                tui.print_line(
+                    Label::Info,
+                    &format!("opening ~/.offpkg/docs/{}/{}.md", runtime, pkg),
+                    Some("edits apply to all future project copies"),
+                );
                 docs_store.open_in_editor(&runtime, &pkg)?;
-                tui.print_line(Label::Done, "saved", Some(&format!("~/.offpkg/docs/{}/{}.md", runtime, pkg)));
+                tui.print_line(
+                    Label::Done,
+                    "saved",
+                    Some(&format!("~/.offpkg/docs/{}/{}.md", runtime, pkg)),
+                );
             }
             DocsSubcommand::Show { pkg, runtime } => {
                 println!("{}", docs_store.read_docs(&runtime, &pkg)?);
             }
             DocsSubcommand::Reset { pkg, runtime } => {
                 let sp = tui.spinner(&format!("fetching original {} docs...", pkg));
-                let version = db.list_packages(Some(&runtime))?
+                let version = db
+                    .list_packages(Some(&runtime))?
                     .into_iter()
                     .filter(|p| p.name == pkg)
-                    .max_by_key(|p| semver::Version::parse(&p.version)
-                        .unwrap_or_else(|_| semver::Version::new(0, 0, 0)))
+                    .max_by_key(|p| {
+                        semver::Version::parse(&p.version)
+                            .unwrap_or_else(|_| semver::Version::new(0, 0, 0))
+                    })
                     .map(|p| p.version)
                     .unwrap_or_else(|| "latest".to_string());
-                let content = fetch_docs(&runtime, &pkg, &version).await
+                let content = fetch_docs(&runtime, &pkg, &version)
+                    .await
                     .unwrap_or_else(|_| format!("# {pkg}\n\nNo docs available.\n"));
                 docs_store.reset_global_doc(&runtime, &pkg, &content)?;
-                sp.finish(Label::Done, &format!("~/.offpkg/docs/{}/{}.md reset", runtime, pkg), None);
+                sp.finish(
+                    Label::Done,
+                    &format!("~/.offpkg/docs/{}/{}.md reset", runtime, pkg),
+                    None,
+                );
             }
             DocsSubcommand::List { runtime } => {
                 tui.render_logo();
                 let base = config.cache_path().join("docs");
-                let runtimes = if let Some(rt) = runtime { vec![rt] }
-                    else { vec!["bun".to_string(), "uv".to_string(), "flutter".to_string()] };
+                let runtimes = if let Some(rt) = runtime {
+                    vec![rt]
+                } else {
+                    vec!["bun".to_string(), "uv".to_string(), "flutter".to_string()]
+                };
                 let mut total = 0;
                 for rt in &runtimes {
                     let dir = base.join(rt);
@@ -312,11 +410,23 @@ async fn main() -> Result<()> {
         // ── Bun ───────────────────────────────────────────────────────────
         Command::Bun { subcmd } => match subcmd {
             BunSubcommand::Add { pkg } => {
-                let mut a = BunAdapter::new(config.clone(), db.clone(), cache.clone(), tui.clone(), docs_store);
-                a.add(&pkg, false)?;
+                let mut a = BunAdapter::new(
+                    config.clone(),
+                    db.clone(),
+                    cache.clone(),
+                    tui.clone(),
+                    docs_store,
+                );
+                a.add(&pkg, false, false)?;
             }
             BunSubcommand::Install { pkg } => {
-                let mut a = BunAdapter::new(config.clone(), db.clone(), cache.clone(), tui.clone(), docs_store);
+                let mut a = BunAdapter::new(
+                    config.clone(),
+                    db.clone(),
+                    cache.clone(),
+                    tui.clone(),
+                    docs_store,
+                );
                 a.install(&pkg).await?;
             }
             BunSubcommand::Remove { pkg } => {
@@ -327,15 +437,33 @@ async fn main() -> Result<()> {
         // ── UV ────────────────────────────────────────────────────────────
         Command::Uv { subcmd } => match subcmd {
             UvSubcommand::Add { pkg } => {
-                let mut a = UvAdapter::new(config.clone(), db.clone(), cache.clone(), tui.clone(), docs_store);
-                a.add(&pkg, false)?;
+                let mut a = UvAdapter::new(
+                    config.clone(),
+                    db.clone(),
+                    cache.clone(),
+                    tui.clone(),
+                    docs_store,
+                );
+                a.add(&pkg, false, false)?;
             }
             UvSubcommand::Install { pkg } => {
-                let mut a = UvAdapter::new(config.clone(), db.clone(), cache.clone(), tui.clone(), docs_store);
+                let mut a = UvAdapter::new(
+                    config.clone(),
+                    db.clone(),
+                    cache.clone(),
+                    tui.clone(),
+                    docs_store,
+                );
                 a.install(&pkg).await?;
             }
             UvSubcommand::InstallAll => {
-                let mut a = UvAdapter::new(config.clone(), db.clone(), cache.clone(), tui.clone(), docs_store);
+                let mut a = UvAdapter::new(
+                    config.clone(),
+                    db.clone(),
+                    cache.clone(),
+                    tui.clone(),
+                    docs_store,
+                );
                 a.install_all().await?;
             }
             UvSubcommand::Remove { pkg } => {
@@ -346,15 +474,33 @@ async fn main() -> Result<()> {
         // ── Flutter ───────────────────────────────────────────────────────
         Command::Flutter { subcmd } => match subcmd {
             FlutterSubcommand::Add { pkg } => {
-                let mut a = FlutterAdapter::new(config.clone(), db.clone(), cache.clone(), tui.clone(), docs_store);
-                a.add(&pkg, false)?;
+                let mut a = FlutterAdapter::new(
+                    config.clone(),
+                    db.clone(),
+                    cache.clone(),
+                    tui.clone(),
+                    docs_store,
+                );
+                a.add(&pkg, false, false)?;
             }
             FlutterSubcommand::Install { pkg } => {
-                let mut a = FlutterAdapter::new(config.clone(), db.clone(), cache.clone(), tui.clone(), docs_store);
+                let mut a = FlutterAdapter::new(
+                    config.clone(),
+                    db.clone(),
+                    cache.clone(),
+                    tui.clone(),
+                    docs_store,
+                );
                 a.install(&pkg).await?;
             }
             FlutterSubcommand::InstallAll => {
-                let mut a = FlutterAdapter::new(config.clone(), db.clone(), cache.clone(), tui.clone(), docs_store);
+                let mut a = FlutterAdapter::new(
+                    config.clone(),
+                    db.clone(),
+                    cache.clone(),
+                    tui.clone(),
+                    docs_store,
+                );
                 a.install_all().await?;
             }
             FlutterSubcommand::Remove { pkg } => {
@@ -370,9 +516,17 @@ async fn main() -> Result<()> {
                 .status()
                 .map_err(|e| anyhow::anyhow!("Failed to run updater: {}", e))?;
             if status.success() {
-                tui.print_line(Label::Done, "offpkg updated", Some("restart terminal to use new version"));
+                tui.print_line(
+                    Label::Done,
+                    "offpkg updated",
+                    Some("restart terminal to use new version"),
+                );
             } else {
-                tui.print_line(Label::Error, "update failed", Some("check your internet connection"));
+                tui.print_line(
+                    Label::Error,
+                    "update failed",
+                    Some("check your internet connection"),
+                );
             }
         }
 
@@ -384,7 +538,8 @@ async fn main() -> Result<()> {
                 &config,
                 pkg.as_deref(),
                 runtime.as_deref(),
-            ).await?;
+            )
+            .await?;
         }
     }
 

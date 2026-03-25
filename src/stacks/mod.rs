@@ -1,9 +1,9 @@
+use crate::config::Config;
 use anyhow::{anyhow, Result};
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::io::{self, Write};
 use std::path::{Path, PathBuf};
-use crate::config::Config;
 
 pub mod builtin;
 
@@ -24,21 +24,30 @@ pub struct Stack {
     pub description: String,
     pub packages: Vec<String>,
     pub dev_packages: Vec<String>,
+    #[serde(default)]
+    pub transitive_packages: Vec<String>,
     pub files: Vec<StackFile>,
 }
 
 // ── Interactive stack creator ─────────────────────────────────────────────────
 
-const CYAN:  &str = "\x1b[38;2;0;212;224m";
+const CYAN: &str = "\x1b[38;2;0;212;224m";
 const GREEN: &str = "\x1b[38;2;0;229;160m";
 const AMBER: &str = "\x1b[38;2;245;166;35m";
 const MUTED: &str = "\x1b[38;2;100;116;139m";
-const BOLD:  &str = "\x1b[1m";
+const BOLD: &str = "\x1b[1m";
 const RESET: &str = "\x1b[0m";
 
 fn prompt(label: &str, hint: Option<&str>) -> Result<String> {
     if let Some(h) = hint {
-        print!("  {}{}{} {} {} ", BOLD, CYAN, label, RESET, format!("{}({}){}", MUTED, h, RESET));
+        print!(
+            "  {}{}{} {} {} ",
+            BOLD,
+            CYAN,
+            label,
+            RESET,
+            format!("{}({}){}", MUTED, h, RESET)
+        );
     } else {
         print!("  {}{}{} {} ", BOLD, CYAN, label, RESET);
     }
@@ -72,7 +81,10 @@ fn prompt_select(label: &str, options: &[&str]) -> Result<String> {
 
 fn prompt_packages(label: &str) -> Result<Vec<String>> {
     println!("  {}{}{}{}", BOLD, CYAN, label, RESET);
-    println!("  {}enter packages one per line, empty line when done{}", MUTED, RESET);
+    println!(
+        "  {}enter packages one per line, empty line when done{}",
+        MUTED, RESET
+    );
 
     let mut packages = vec![];
     loop {
@@ -160,21 +172,36 @@ pub fn interactive_create(custom_dir: &Path) -> Result<Stack> {
         description,
         packages,
         dev_packages,
+        transitive_packages: vec![],
         files: vec![],
     };
 
     fs::create_dir_all(custom_dir)?;
     let path = custom_dir.join(format!("{}.toml", name));
-    let content = toml::to_string_pretty(&stack)
-        .map_err(|e| anyhow!("Failed to serialize stack: {}", e))?;
+    let content =
+        toml::to_string_pretty(&stack).map_err(|e| anyhow!("Failed to serialize stack: {}", e))?;
     fs::write(&path, &content)?;
 
     println!();
-    println!("  {}{}✓{} stack saved to {}{}{}", BOLD, GREEN, RESET, MUTED, path.display(), RESET);
+    println!(
+        "  {}{}✓{} stack saved to {}{}{}",
+        BOLD,
+        GREEN,
+        RESET,
+        MUTED,
+        path.display(),
+        RESET
+    );
     println!();
     println!("  {}next steps:{}", MUTED, RESET);
-    println!("  {}→{} cache packages  {}offpkg stack install {}{}", CYAN, RESET, AMBER, name, RESET);
-    println!("  {}→{} use in project  {}offpkg stack add {}{}", CYAN, RESET, AMBER, name, RESET);
+    println!(
+        "  {}→{} cache packages  {}offpkg stack install {}{}",
+        CYAN, RESET, AMBER, name, RESET
+    );
+    println!(
+        "  {}→{} use in project  {}offpkg stack add {}{}",
+        CYAN, RESET, AMBER, name, RESET
+    );
     println!();
 
     Ok(stack)
@@ -229,7 +256,9 @@ impl StackStore {
             if let Some(parent) = dest.parent() {
                 fs::create_dir_all(parent)?;
             }
-            if dest.exists() { continue; }
+            if dest.exists() {
+                continue;
+            }
             if let Some(binary) = &file.binary_content {
                 fs::write(&dest, binary)
                     .map_err(|e| anyhow!("Failed to write binary {:?}: {}", dest, e))?;
@@ -250,7 +279,8 @@ impl StackStore {
         let path = self.custom_dir().join(format!("{}.toml", name));
         if !path.exists() {
             return Err(anyhow!(
-                "'{}' is a built-in stack and cannot be deleted.", name
+                "'{}' is a built-in stack and cannot be deleted.",
+                name
             ));
         }
         fs::remove_file(&path)?;

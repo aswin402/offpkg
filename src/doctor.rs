@@ -1,17 +1,21 @@
-use anyhow::Result;
-use std::process::Command;
-use std::path::PathBuf;
 use crate::config::Config;
 use crate::db::Database;
 use crate::tui::{Label, TUI};
+use anyhow::Result;
+use std::path::PathBuf;
+use std::process::Command;
 
 pub fn run_doctor(tui: &mut TUI, config: &Config, db: &Database) -> Result<()> {
     tui.render_logo();
-    tui.print_line(Label::Info, "offpkg doctor", Some("running environment checks"));
+    tui.print_line(
+        Label::Info,
+        "offpkg doctor",
+        Some("running environment checks"),
+    );
     println!();
 
-    check_runtime(tui, "bun",     &["bun",     "--version"]);
-    check_runtime(tui, "uv",      &["uv",      "--version"]);
+    check_runtime(tui, "bun", &["bun", "--version"]);
+    check_runtime(tui, "uv", &["uv", "--version"]);
     check_runtime(tui, "flutter", &["flutter", "--version"]);
 
     check_cache_dir(tui, &config.cache_path());
@@ -29,12 +33,20 @@ fn check_runtime(tui: &mut TUI, name: &str, args: &[&str]) {
             // Flutter writes its version to stderr; most others use stdout
             let stdout = String::from_utf8_lossy(&out.stdout);
             let stderr = String::from_utf8_lossy(&out.stderr);
-            let raw = if stdout.trim().is_empty() { stderr } else { stdout };
+            let raw = if stdout.trim().is_empty() {
+                stderr
+            } else {
+                stdout
+            };
             let version = raw.lines().next().unwrap_or("").trim().to_string();
             tui.print_line(Label::Done, name, Some(&version));
         }
         Ok(_) => {
-            tui.print_line(Label::Error, name, Some("command failed — is it installed?"));
+            tui.print_line(
+                Label::Error,
+                name,
+                Some("command failed — is it installed?"),
+            );
         }
         Err(_) => {
             tui.print_line(Label::Warn, name, Some("not found in PATH"));

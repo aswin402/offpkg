@@ -1,26 +1,26 @@
-use std::io::{self, Write};
-use std::sync::{Arc, atomic::{AtomicBool, Ordering}};
-use std::time::Duration;
-use anyhow::Result;
 use crate::config::Config;
+use anyhow::Result;
+use std::io::{self, Write};
+use std::sync::{
+    atomic::{AtomicBool, Ordering},
+    Arc,
+};
+use std::time::Duration;
 
 // ANSI color codes
-const CYAN:       &str = "\x1b[38;2;0;212;224m";
-const GREEN:      &str = "\x1b[38;2;0;229;160m";
-const AMBER:      &str = "\x1b[38;2;245;166;35m";
-const CORAL:      &str = "\x1b[38;2;255;107;107m";
-const PURPLE:     &str = "\x1b[38;2;167;139;250m";
-const BLUE:       &str = "\x1b[38;2;96;165;250m";
-const MUTED:      &str = "\x1b[38;2;100;116;139m";
-const BOLD:       &str = "\x1b[1m";
-const RESET:      &str = "\x1b[0m";
+const CYAN: &str = "\x1b[38;2;0;212;224m";
+const GREEN: &str = "\x1b[38;2;0;229;160m";
+const AMBER: &str = "\x1b[38;2;245;166;35m";
+const CORAL: &str = "\x1b[38;2;255;107;107m";
+const PURPLE: &str = "\x1b[38;2;167;139;250m";
+const BLUE: &str = "\x1b[38;2;96;165;250m";
+const MUTED: &str = "\x1b[38;2;100;116;139m";
+const BOLD: &str = "\x1b[1m";
+const RESET: &str = "\x1b[0m";
 const CLEAR_LINE: &str = "\x1b[2K\r";
 
 // Braille spinner frames
-const SPINNER_FRAMES: &[&str] = &[
-    "⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏",
-];
-
+const SPINNER_FRAMES: &[&str] = &["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
 
 // ── Label ─────────────────────────────────────────────────────────────────────
 
@@ -39,27 +39,27 @@ pub enum Label {
 impl Label {
     fn color(&self) -> &'static str {
         match self {
-            Label::Resolve  => CYAN,
-            Label::Cache    => PURPLE,
-            Label::Link     => GREEN,
-            Label::Install  => GREEN,
-            Label::Done     => GREEN,
-            Label::Warn     => AMBER,
-            Label::Error    => CORAL,
-            Label::Info     => BLUE,
+            Label::Resolve => CYAN,
+            Label::Cache => PURPLE,
+            Label::Link => GREEN,
+            Label::Install => GREEN,
+            Label::Done => GREEN,
+            Label::Warn => AMBER,
+            Label::Error => CORAL,
+            Label::Info => BLUE,
         }
     }
 
     fn text(&self) -> &'static str {
         match self {
-            Label::Resolve  => "resolve",
-            Label::Cache    => "cache  ",
-            Label::Link     => "link   ",
-            Label::Install  => "install",
-            Label::Done     => "done   ",
-            Label::Warn     => "warn   ",
-            Label::Error    => "error  ",
-            Label::Info     => "info   ",
+            Label::Resolve => "resolve",
+            Label::Cache => "cache  ",
+            Label::Link => "link   ",
+            Label::Install => "install",
+            Label::Done => "done   ",
+            Label::Warn => "warn   ",
+            Label::Error => "error  ",
+            Label::Info => "info   ",
         }
     }
 
@@ -71,7 +71,7 @@ impl Label {
 // ── Spinner ───────────────────────────────────────────────────────────────────
 
 pub struct Spinner {
-    done:   Arc<AtomicBool>,
+    done: Arc<AtomicBool>,
     thread: Option<std::thread::JoinHandle<()>>,
 }
 
@@ -83,13 +83,14 @@ impl Spinner {
         let thread = std::thread::spawn(move || {
             let mut frame = 0usize;
             loop {
-                if done_clone.load(Ordering::Relaxed) { break; }
+                if done_clone.load(Ordering::Relaxed) {
+                    break;
+                }
 
                 let f = SPINNER_FRAMES[frame % SPINNER_FRAMES.len()];
-                print!("{}{}{}{}{} {}{}",
-                    CLEAR_LINE,
-                    BOLD, CYAN, f, RESET,
-                    MUTED, message,
+                print!(
+                    "{}{}{}{}{} {}{}",
+                    CLEAR_LINE, BOLD, CYAN, f, RESET, MUTED, message,
                 );
                 // trailing reset so color doesn't bleed
                 print!("{}", RESET);
@@ -101,7 +102,10 @@ impl Spinner {
             io::stdout().flush().ok();
         });
 
-        Self { done, thread: Some(thread) }
+        Self {
+            done,
+            thread: Some(thread),
+        }
     }
 
     /// Stop spinner and replace with a finished label line.
@@ -132,13 +136,13 @@ impl Drop for Spinner {
 // ── ProgressBar ───────────────────────────────────────────────────────────────
 
 struct PBarState {
-    pct:   f32,
+    pct: f32,
     label: String,
 }
 
 pub struct ProgressBar {
-    done:   Arc<AtomicBool>,
-    state:  Arc<std::sync::Mutex<PBarState>>,
+    done: Arc<AtomicBool>,
+    state: Arc<std::sync::Mutex<PBarState>>,
     thread: Option<std::thread::JoinHandle<()>>,
 }
 
@@ -147,13 +151,13 @@ const TERM_BAR_WIDTH: usize = 55;
 
 impl ProgressBar {
     pub fn start(label: impl Into<String>) -> Self {
-        let done  = Arc::new(AtomicBool::new(false));
+        let done = Arc::new(AtomicBool::new(false));
         let state = Arc::new(std::sync::Mutex::new(PBarState {
             pct: 0.0,
             label: label.into(),
         }));
 
-        let done_clone  = done.clone();
+        let done_clone = done.clone();
         let state_clone = state.clone();
 
         let thread = std::thread::spawn(move || {
@@ -162,7 +166,9 @@ impl ProgressBar {
             let mut display_pct: f32 = 0.0;
 
             loop {
-                if done_clone.load(Ordering::Relaxed) { break; }
+                if done_clone.load(Ordering::Relaxed) {
+                    break;
+                }
 
                 let (target_pct, lbl) = {
                     let s = state_clone.lock().unwrap();
@@ -176,7 +182,7 @@ impl ProgressBar {
                 }
 
                 let filled = ((display_pct * TERM_BAR_WIDTH as f32) as usize).min(TERM_BAR_WIDTH);
-                let empty  = TERM_BAR_WIDTH - filled;
+                let empty = TERM_BAR_WIDTH - filled;
 
                 // Glowing head: last filled char is brighter
                 let bar = if filled == 0 {
@@ -184,11 +190,13 @@ impl ProgressBar {
                 } else if filled == TERM_BAR_WIDTH {
                     format!("{}{}{}", CYAN, "─".repeat(TERM_BAR_WIDTH), RESET)
                 } else {
-                    format!("{}{}{}{}{}{}{}",
+                    format!(
+                        "{}{}{}{}{}{}{}",
                         CYAN,
                         "─".repeat(filled.saturating_sub(1)),
                         // glowing head
-                        "[38;2;180;245;255m", "●",
+                        "[38;2;180;245;255m",
+                        "●",
                         MUTED,
                         "─".repeat(empty),
                         RESET,
@@ -196,14 +204,13 @@ impl ProgressBar {
                 };
 
                 // Label above bar, bar below — matches the screenshot layout
-                print!("{}  {}{}{} {}",
-                    CLEAR_LINE,
-                    MUTED, lbl, RESET,
-                    ""
-                );
+                print!("{}  {}{}{} {}", CLEAR_LINE, MUTED, lbl, RESET, "");
                 // Move to next line and print bar
-                print!("
-{}{}{}", CLEAR_LINE, bar, RESET);
+                print!(
+                    "
+{}{}{}",
+                    CLEAR_LINE, bar, RESET
+                );
                 // Move cursor back up one line
                 print!("[1A");
 
@@ -214,7 +221,8 @@ impl ProgressBar {
 
             // Print final full bar on its own line
             print!("{}", CLEAR_LINE);
-            print!("
+            print!(
+                "
 {}{}{}
 ",
                 CLEAR_LINE,
@@ -224,7 +232,11 @@ impl ProgressBar {
             io::stdout().flush().ok();
         });
 
-        Self { done, state, thread: Some(thread) }
+        Self {
+            done,
+            state,
+            thread: Some(thread),
+        }
     }
 
     pub fn set(&self, pct: f32, label: Option<&str>) {
@@ -261,14 +273,20 @@ impl Drop for ProgressBar {
 // ── Shared print helper ───────────────────────────────────────────────────────
 
 fn print_label_line(label: Label, message: &str, secondary: Option<&str>) {
-    let bold_on  = if label.bold() { BOLD } else { "" };
+    let bold_on = if label.bold() { BOLD } else { "" };
     let bold_off = if label.bold() { RESET } else { "" };
     let sec = secondary
         .map(|s| format!("  {}{}{}", MUTED, s, RESET))
         .unwrap_or_default();
-    println!("{}{}[ {} ]{}  {}{}{}{}",
-        bold_on, label.color(), label.text(), RESET,
-        bold_on, message, bold_off,
+    println!(
+        "{}{}[ {} ]{}  {}{}{}{}",
+        bold_on,
+        label.color(),
+        label.text(),
+        RESET,
+        bold_on,
+        message,
+        bold_off,
         sec,
     );
     io::stdout().flush().ok();
@@ -318,7 +336,12 @@ impl TUI {
         ProgressBar::start(label)
     }
 
-    pub fn print_done_summary(&mut self, packages: usize, downloaded: u64, elapsed: std::time::Duration) {
+    pub fn print_done_summary(
+        &mut self,
+        packages: usize,
+        downloaded: u64,
+        elapsed: std::time::Duration,
+    ) {
         let size_str = if downloaded == 0 {
             "0 B".to_string()
         } else if downloaded < 1_000_000 {
@@ -328,18 +351,29 @@ impl TUI {
         };
         let elapsed_str = {
             let ms = elapsed.as_millis();
-            if ms < 1000 { format!("{}ms", ms) } else { format!("{:.2}s", elapsed.as_secs_f64()) }
+            if ms < 1000 {
+                format!("{}ms", ms)
+            } else {
+                format!("{:.2}s", elapsed.as_secs_f64())
+            }
         };
         let pkg_word = if packages == 1 { "package" } else { "packages" };
 
         println!();
-        println!("  {}{}✓{}  {}{}{} {}{}    {}{}    {}{}",
-            BOLD, GREEN, RESET,
-            BOLD, packages, RESET,
+        println!(
+            "  {}{}✓{}  {}{}{} {}{}    {}{}    {}{}",
+            BOLD,
+            GREEN,
+            RESET,
+            BOLD,
+            packages,
+            RESET,
             pkg_word,
             MUTED,
-            size_str, RESET,
-            MUTED, elapsed_str,
+            size_str,
+            RESET,
+            MUTED,
+            elapsed_str,
         );
         println!();
         io::stdout().flush().ok();
@@ -350,7 +384,10 @@ impl TUI {
         println!("{}{}╔═╗╔═╗╔═╗╔═╗╦╔═╔═╗{}", BOLD, CYAN, RESET);
         println!("{}{}║ ║╠╣ ╠╣ ╠═╝╠╩╗║ ╦{}", BOLD, CYAN, RESET);
         println!("{}{}╚═╝╚  ╚  ╩  ╩ ╩╚═╝{}", BOLD, CYAN, RESET);
-        println!("  {}offpkg v0.1.1 · universal offline package manager{}", MUTED, RESET);
+        println!(
+            "  {}offpkg v0.1.1 · universal offline package manager{}",
+            MUTED, RESET
+        );
         println!();
         io::stdout().flush().ok();
     }

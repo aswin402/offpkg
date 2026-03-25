@@ -19,6 +19,8 @@
 | **Stacks** | One command to install a full project setup — `offpkg stack add react-vite` |
 | **Global Docs** | Edit package READMEs once in `~/.offpkg/docs/`, auto-copied to every project |
 | **SQLite DB** | Tracks all cached packages in `offpkg.db` with checksums and metadata |
+| **Pristine Templates** | Deep transitive dependency resolution strictly maps into `node_modules/` without polluting `package.json` |
+| **Binary Assets** | Stack templates natively embed `.png` and binary core files directly inside the Rust CLI |
 | **Beautiful TUI** | Animated spinner, progress bar, colored labels — inspired by Bun's output |
 | **Doctor** | Runtime health checks, cache integrity, DB diagnostics |
 | **Cache Prune** | `remove <pkg>` deletes cache + DB record, shows freed space |
@@ -143,13 +145,14 @@ offpkg doctor                      # environment health check
 
 | Stack | Runtime | Packages |
 |---|---|---|
-| `react-vite` | bun | react, react-dom, vite, @vitejs/plugin-react, typescript, @types/react, @types/react-dom |
-| `react-vite-full` | bun | above + zustand, @tanstack/react-query, react-hook-form, @hookform/resolvers, zod, axios |
+| *`react-vite`* | bun | react, react-dom, vite, typescript, etc. + **210+ transitive dependencies** |
+| *`react-vite-full`* | bun | above + zustand, @tanstack/react-query, hook-form, zod, axios + **210+ transitive** |
 | `hono-api` | bun | hono, @prisma/client, zod, pino, pg, dotenv + dev: typescript, prisma, pino-pretty |
 | `fastapi` | uv | fastapi, uvicorn, sqlalchemy, asyncpg, alembic, pydantic-settings, python-dotenv, structlog |
 | `flutter-riverpod` | flutter | flutter_riverpod, hooks_riverpod, flutter_hooks, go_router, dio, logger |
 
 Each stack also generates starter config files (`vite.config.ts`, `tsconfig.json`, `main.dart`, etc.) automatically.
+Furthermore, the React-Vite stacks natively embed global **binary assets** (e.g. `hero.png`) and fully resolve **all deep dependencies** directly into `node_modules` without altering your project configuration.
 
 ---
 

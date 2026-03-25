@@ -1,10 +1,10 @@
+use crate::config::Config;
+use crate::db::Package;
 use anyhow::{anyhow, Result};
 use sha2::{Digest, Sha256};
 use std::fs;
 use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
-use crate::config::Config;
-use crate::db::Package;
 
 #[derive(Clone)]
 pub struct Cache {
@@ -21,15 +21,14 @@ impl Cache {
     /// __vitejs__plugin-react to avoid creating subdirectories.
     pub fn path_for(&self, runtime: &str, name: &str, version: &str) -> PathBuf {
         let ext = match runtime {
-            "uv"      => "whl",
+            "uv" => "whl",
             "flutter" => "tar.gz",
-            _         => "tgz",
+            _ => "tgz",
         };
         // Flatten scoped package names: @scope/name -> __scope__name
-        let safe_name = name
-            .replace('@', "__")
-            .replace('/', "__");
-        self.config.cache_path()
+        let safe_name = name.replace('@', "__").replace('/', "__");
+        self.config
+            .cache_path()
             .join(runtime)
             .join(format!("{}@{}.{}", safe_name, version, ext))
     }
@@ -71,8 +70,8 @@ impl Cache {
             .await
             .map_err(|e| anyhow!("Failed to read response body: {}", e))?;
 
-        let mut file = fs::File::create(dest)
-            .map_err(|e| anyhow!("Cannot create file {:?}: {}", dest, e))?;
+        let mut file =
+            fs::File::create(dest).map_err(|e| anyhow!("Cannot create file {:?}: {}", dest, e))?;
 
         file.write_all(&bytes)?;
         Ok(bytes.len() as u64)
@@ -81,13 +80,15 @@ impl Cache {
 
 /// Standalone SHA-256 helper reused by adapters.
 pub fn compute_sha256(path: &Path) -> Result<String> {
-    let mut file = fs::File::open(path)
-        .map_err(|e| anyhow!("Cannot open {:?} for checksum: {}", path, e))?;
+    let mut file =
+        fs::File::open(path).map_err(|e| anyhow!("Cannot open {:?} for checksum: {}", path, e))?;
     let mut hasher = Sha256::new();
     let mut buffer = [0u8; 8192];
     loop {
         let n = file.read(&mut buffer)?;
-        if n == 0 { break; }
+        if n == 0 {
+            break;
+        }
         hasher.update(&buffer[..n]);
     }
     Ok(format!("{:x}", hasher.finalize()))
