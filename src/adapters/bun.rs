@@ -91,7 +91,7 @@ impl BunAdapter {
         Ok(())
     }
 
-    pub fn add(&mut self, pkg: &str) -> Result<()> {
+    pub fn add(&mut self, pkg: &str, skip_config: bool) -> Result<()> {
         let start = Instant::now();
 
         // ── Step 1: resolve from cache ───────────────────────────────────
@@ -152,7 +152,10 @@ impl BunAdapter {
         extract_tgz(Path::new(&cached.cache_path), &pkg_dest)
             .map_err(|e| anyhow!("Failed to extract '{}': {}", pkg, e))?;
         bar.set(0.75, Some(&format!("linking {}", cached.name)));
-        update_package_json(&cwd, &cached.name, &cached.version)?;
+        if !skip_config {
+            update_package_json(&cwd, &cached.name, &cached.version)?;
+        }
+        create_bin_links(&pkg_dest, &cwd.join("node_modules"))?; 
         // hold at 100% briefly so user sees the full bar
         bar.set(1.0, None);
         std::thread::sleep(std::time::Duration::from_millis(180));
@@ -229,5 +232,57 @@ fn update_package_json(cwd: &Path, pkg_name: &str, version: &str) -> Result<()> 
         json["dependencies"] = serde_json::json!({ pkg_name: format!("^{}", version) });
     }
     fs::write(&path, serde_json::to_string_pretty(&json)?)?;
+    Ok(())
+}
+
+fn create_bin_links(pkg_dir: &Path, node_modules: &Path) -> Result<()> {
+    let pkg_json_path = pkg_dir.join("package.json");
+    if !pkg_json_path.exists() { return Ok(()); }
+    
+    let pkg_json: serde_json::Value = serde_json::from_str(&fs::read_to_string(pkg_json_path)?)?;
+    let bin_field = match pkg_json.get("bin") {
+        Some(b) => b,
+        None => return Ok(()),
+    };
+
+    let bin_dir = node_modules.join(".bin");
+    fs::create_dir_all(&bin_dir)?;
+
+    let pkg_name = pkg_json.get("name").and_then(|n| n.as_str()).unwrap_or("");
+
+    match bin_field {
+        serde_json::Value::String(path) => {
+            if !pkg_name.is_empty() {
+                link_bin(pkg_dir.join(path), bin_dir.join(pkg_name))?;
+            }
+        }
+        serde_json::Value::Object(map) => {
+            for (name, path) in map {
+                if let Some(path_str) = path.as_str() {
+                    link_bin(pkg_dir.join(path_str), bin_dir.join(name))?;
+                }
+            }
+        }
+        _ => {}
+    }
+
+    Ok(())
+}
+
+fn link_bin(src: std::path::PathBuf, dest: std::path::PathBuf) -> Result<()> {
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::symlink;
+        if dest.exists() { let _ = fs::remove_file(&dest); }
+        // Ensure src exists and is executable
+        if src.exists() {
+            symlink(&src, &dest)?;
+            // Set executable bit
+            use std::os::unix::fs::PermissionsExt;
+            let mut perms = fs::metadata(&src)?.permissions();
+            perms.set_mode(0o755);
+            fs::set_permissions(&src, perms)?;
+        }
+    }
     Ok(())
 }

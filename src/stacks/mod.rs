@@ -5,12 +5,16 @@ use std::io::{self, Write};
 use std::path::{Path, PathBuf};
 use crate::config::Config;
 
+pub mod builtin;
+
 // ── Stack definition ──────────────────────────────────────────────────────────
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct StackFile {
     pub path: String,
     pub content: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub binary_content: Option<Vec<u8>>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -21,144 +25,6 @@ pub struct Stack {
     pub packages: Vec<String>,
     pub dev_packages: Vec<String>,
     pub files: Vec<StackFile>,
-}
-
-// ── Built-in stacks ───────────────────────────────────────────────────────────
-
-pub fn builtin_stacks() -> Vec<Stack> {
-    vec![
-        Stack {
-            name: "react-vite".into(),
-            runtime: "bun".into(),
-            description: "React + Vite + TypeScript — minimal starter".into(),
-            packages: vec!["react".into(), "react-dom".into()],
-            dev_packages: vec![
-                "vite".into(), "@vitejs/plugin-react".into(),
-                "typescript".into(), "@types/react".into(), "@types/react-dom".into(),
-            ],
-            files: vec![
-                StackFile { path: "vite.config.ts".into(), content: r#"import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-export default defineConfig({ plugins: [react()] })"#.into() },
-                StackFile { path: "tsconfig.json".into(), content: r#"{
-  "compilerOptions": {
-    "target": "ES2020",
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    "jsx": "react-jsx",
-    "strict": true
-  },
-  "include": ["src"]
-}"#.into() },
-                StackFile { path: "index.html".into(), content: r#"<!DOCTYPE html>
-<html lang="en">
-  <head><meta charset="UTF-8" /><title>App</title></head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
-</html>"#.into() },
-                StackFile { path: "src/main.tsx".into(), content: r#"import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import App from './App'
-createRoot(document.getElementById('root')!).render(
-  <StrictMode><App /></StrictMode>
-)"#.into() },
-                StackFile { path: "src/App.tsx".into(), content: r#"export default function App() {
-  return <h1>Hello from offpkg</h1>
-}"#.into() },
-            ],
-        },
-        Stack {
-            name: "react-vite-full".into(),
-            runtime: "bun".into(),
-            description: "React + Vite + Zustand + TanStack Query + React Hook Form + Zod + Axios".into(),
-            packages: vec![
-                "react".into(), "react-dom".into(),
-                "zustand".into(), "@tanstack/react-query".into(),
-                "react-hook-form".into(), "@hookform/resolvers".into(),
-                "zod".into(), "axios".into(),
-            ],
-            dev_packages: vec![
-                "vite".into(), "@vitejs/plugin-react".into(),
-                "typescript".into(), "@types/react".into(), "@types/react-dom".into(),
-            ],
-            files: vec![
-                StackFile { path: "vite.config.ts".into(), content: "import { defineConfig } from 'vite'\nimport react from '@vitejs/plugin-react'\nexport default defineConfig({ plugins: [react()] })".into() },
-                StackFile { path: "src/main.tsx".into(), content: r#"import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import App from './App'
-const queryClient = new QueryClient()
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <QueryClientProvider client={queryClient}><App /></QueryClientProvider>
-  </StrictMode>
-)"#.into() },
-                StackFile { path: "src/store.ts".into(), content: r#"import { create } from 'zustand'
-interface AppState { count: number; increment: () => void }
-export const useAppStore = create<AppState>((set) => ({
-  count: 0,
-  increment: () => set((s) => ({ count: s.count + 1 })),
-}))"#.into() },
-            ],
-        },
-        Stack {
-            name: "hono-api".into(),
-            runtime: "bun".into(),
-            description: "Hono API + Prisma + Zod + Pino + PostgreSQL".into(),
-            packages: vec!["hono".into(), "@prisma/client".into(), "zod".into(), "pino".into(), "pg".into(), "dotenv".into()],
-            dev_packages: vec!["typescript".into(), "@types/node".into(), "prisma".into(), "pino-pretty".into(), "@types/pg".into()],
-            files: vec![
-                StackFile { path: "src/index.ts".into(), content: r#"import { Hono } from 'hono'
-import { logger } from 'hono/logger'
-const app = new Hono()
-app.use('*', logger())
-app.get('/', (c) => c.json({ message: 'Hello from offpkg' }))
-export default { port: process.env.PORT || 3000, fetch: app.fetch }"#.into() },
-                StackFile { path: ".env".into(), content: "DATABASE_URL=\"postgresql://user:password@localhost:5432/mydb\"\nPORT=3000".into() },
-            ],
-        },
-        Stack {
-            name: "fastapi".into(),
-            runtime: "uv".into(),
-            description: "FastAPI + SQLAlchemy + Alembic + Pydantic + Uvicorn".into(),
-            packages: vec!["fastapi".into(), "uvicorn".into(), "sqlalchemy".into(), "asyncpg".into(), "alembic".into(), "pydantic-settings".into(), "python-dotenv".into(), "structlog".into()],
-            dev_packages: vec![],
-            files: vec![
-                StackFile { path: "app/main.py".into(), content: "from fastapi import FastAPI\napp = FastAPI()\n\n@app.get(\"/\")\nasync def root():\n    return {\"message\": \"Hello from offpkg\"}\n".into() },
-                StackFile { path: ".env".into(), content: "DATABASE_URL=postgresql+asyncpg://user:password@localhost:5432/mydb\nDEBUG=true".into() },
-            ],
-        },
-        Stack {
-            name: "flutter-riverpod".into(),
-            runtime: "flutter".into(),
-            description: "Flutter + Riverpod + Hooks + go_router + Dio + Logger".into(),
-            packages: vec!["flutter_riverpod".into(), "hooks_riverpod".into(), "flutter_hooks".into(), "go_router".into(), "dio".into(), "logger".into()],
-            dev_packages: vec![],
-            files: vec![
-                StackFile { path: "lib/main.dart".into(), content: r#"import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-void main() {
-  runApp(const ProviderScope(child: MyApp()));
-}
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'offpkg App',
-      home: Scaffold(
-        appBar: AppBar(title: const Text('Hello from offpkg')),
-        body: const Center(child: Text('Stack ready')),
-      ),
-    );
-  }
-}"#.into() },
-            ],
-        },
-    ]
 }
 
 // ── Interactive stack creator ─────────────────────────────────────────────────
@@ -193,7 +59,6 @@ fn prompt_select(label: &str, options: &[&str]) -> Result<String> {
     io::stdin().read_line(&mut input)?;
     let trimmed = input.trim();
 
-    // Accept number or name
     if let Ok(n) = trimmed.parse::<usize>() {
         if n >= 1 && n <= options.len() {
             return Ok(options[n - 1].to_string());
@@ -238,7 +103,6 @@ pub fn interactive_create(custom_dir: &Path) -> Result<Stack> {
     println!("  {}────────────────────────{}", MUTED, RESET);
     println!();
 
-    // Stack name
     let name = prompt("stack name", Some("e.g. my-react-setup"))?;
     if name.is_empty() {
         return Err(anyhow!("Stack name cannot be empty"));
@@ -247,10 +111,8 @@ pub fn interactive_create(custom_dir: &Path) -> Result<Stack> {
         return Err(anyhow!("Stack name cannot contain spaces — use hyphens"));
     }
 
-    // Runtime
     let runtime = prompt_select("runtime", &["bun", "uv", "flutter"])?;
 
-    // Description
     let description = prompt("description", Some("short description of this stack"))?;
     let description = if description.is_empty() {
         format!("Custom {} stack", runtime)
@@ -260,7 +122,6 @@ pub fn interactive_create(custom_dir: &Path) -> Result<Stack> {
 
     println!();
 
-    // Packages
     let packages = prompt_packages("packages")?;
     if packages.is_empty() {
         return Err(anyhow!("At least one package is required"));
@@ -268,7 +129,6 @@ pub fn interactive_create(custom_dir: &Path) -> Result<Stack> {
 
     println!();
 
-    // Dev packages
     let has_dev = confirm("add dev dependencies?")?;
     let dev_packages = if has_dev {
         println!();
@@ -279,7 +139,6 @@ pub fn interactive_create(custom_dir: &Path) -> Result<Stack> {
 
     println!();
 
-    // Summary
     println!("  {}{}stack summary{}", BOLD, CYAN, RESET);
     println!("  {}────────────────────────{}", MUTED, RESET);
     println!("  {}name{}       {}", MUTED, RESET, name);
@@ -304,7 +163,6 @@ pub fn interactive_create(custom_dir: &Path) -> Result<Stack> {
         files: vec![],
     };
 
-    // Save to ~/.offpkg/stacks/<name>.toml
     fs::create_dir_all(custom_dir)?;
     let path = custom_dir.join(format!("{}.toml", name));
     let content = toml::to_string_pretty(&stack)
@@ -341,7 +199,7 @@ impl StackStore {
     }
 
     pub fn all_stacks(&self) -> Vec<Stack> {
-        let mut stacks = builtin_stacks();
+        let mut stacks = builtin::builtin_stacks();
         let dir = self.custom_dir();
         if dir.exists() {
             if let Ok(entries) = fs::read_dir(&dir) {
@@ -372,8 +230,13 @@ impl StackStore {
                 fs::create_dir_all(parent)?;
             }
             if dest.exists() { continue; }
-            fs::write(&dest, &file.content)
-                .map_err(|e| anyhow!("Failed to write {:?}: {}", dest, e))?;
+            if let Some(binary) = &file.binary_content {
+                fs::write(&dest, binary)
+                    .map_err(|e| anyhow!("Failed to write binary {:?}: {}", dest, e))?;
+            } else {
+                fs::write(&dest, &file.content)
+                    .map_err(|e| anyhow!("Failed to write {:?}: {}", dest, e))?;
+            }
             created.push(file.path.clone());
         }
         Ok(created)
@@ -384,7 +247,6 @@ impl StackStore {
     }
 
     pub fn delete(&self, name: &str) -> Result<()> {
-        // only custom stacks can be deleted
         let path = self.custom_dir().join(format!("{}.toml", name));
         if !path.exists() {
             return Err(anyhow!(

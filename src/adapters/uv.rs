@@ -21,7 +21,7 @@ impl UvAdapter {
         Self { config, db, cache, tui, docs }
     }
 
-    pub fn add(&mut self, pkg: &str) -> Result<()> {
+    pub fn add(&mut self, pkg: &str, _skip_config: bool) -> Result<()> {
         let start = Instant::now();
 
         let sp = self.tui.spinner(&format!("resolving {} from offpkg cache...", pkg));

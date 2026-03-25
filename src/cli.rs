@@ -43,6 +43,8 @@ pub enum Command {
         subcmd: DocsSubcommand,
     },
     Doctor,
+    /// Update offpkg itself to the latest version
+    SelfUpdate,
 }
 
 #[derive(Subcommand, Clone, Debug)]

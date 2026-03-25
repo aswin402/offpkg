@@ -87,7 +87,7 @@ impl FlutterAdapter {
         Ok(())
     }
 
-    pub fn add(&mut self, pkg: &str) -> Result<()> {
+    pub fn add(&mut self, pkg: &str, skip_config: bool) -> Result<()> {
         let start = Instant::now();
 
         let sp = self.tui.spinner(&format!("resolving {} from offpkg cache...", pkg));
@@ -127,7 +127,7 @@ impl FlutterAdapter {
 
         if !add_output.status.success() {
             drop(bar);
-            return self.pub_get_offline(pkg, &cached.version, start);
+            return self.pub_get_offline(pkg, &cached.version, start, skip_config);
         }
 
         let get_output = Command::new("flutter")
@@ -160,17 +160,19 @@ impl FlutterAdapter {
         Ok(())
     }
 
-    fn pub_get_offline(&mut self, pkg: &str, version: &str, start: Instant) -> Result<()> {
+    fn pub_get_offline(&mut self, pkg: &str, version: &str, start: Instant, skip_config: bool) -> Result<()> {
         let cwd = std::env::current_dir()?;
         let pubspec_path = cwd.join("pubspec.yaml");
         if !pubspec_path.exists() {
             return Err(anyhow!("No pubspec.yaml found. Run from inside your Flutter project."));
         }
         let content = fs::read_to_string(&pubspec_path)?;
-        if !content.contains(&format!("  {}:", pkg)) {
-            let updated = insert_pubspec_dep(&content, pkg, version)?;
-            fs::write(&pubspec_path, updated)?;
-            self.tui.print_line(Label::Link, "added to pubspec.yaml", Some(pkg));
+        if !skip_config {
+            if !content.contains(&format!("  {}:", pkg)) {
+                let updated = insert_pubspec_dep(&content, pkg, version)?;
+                fs::write(&pubspec_path, updated)?;
+                self.tui.print_line(Label::Link, "added to pubspec.yaml", Some(pkg));
+            }
         }
         let output = Command::new("flutter")
             .args(["pub", "get", "--offline"])

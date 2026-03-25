@@ -188,6 +188,17 @@ async fn main() -> Result<()> {
                     .cloned()
                     .collect();
 
+                // Write config files
+                println!();
+                tui.print_line(Label::Cache, "writing config files", None);
+                let created = stack_store.write_files(&stack, &cwd)?;
+                for f in &created {
+                    tui.print_line(Label::Link, f, Some("created"));
+                }
+                if created.is_empty() {
+                    tui.print_line(Label::Info, "all config files already exist", Some("skipped"));
+                }
+
                 let mut success = 0;
                 let mut failed: Vec<String> = vec![];
 
@@ -195,15 +206,15 @@ async fn main() -> Result<()> {
                     let result = match stack.runtime.as_str() {
                         "bun" => {
                             let mut a = BunAdapter::new(config.clone(), db.clone(), cache.clone(), tui.clone(), docs_store.clone());
-                            a.add(pkg)
+                            a.add(pkg, true)
                         }
                         "uv" => {
                             let mut a = UvAdapter::new(config.clone(), db.clone(), cache.clone(), tui.clone(), docs_store.clone());
-                            a.add(pkg)
+                            a.add(pkg, true)
                         }
                         "flutter" => {
                             let mut a = FlutterAdapter::new(config.clone(), db.clone(), cache.clone(), tui.clone(), docs_store.clone());
-                            a.add(pkg)
+                            a.add(pkg, true)
                         }
                         _ => Err(anyhow!("Unknown runtime: {}", stack.runtime)),
                     };
@@ -215,17 +226,6 @@ async fn main() -> Result<()> {
                             failed.push(pkg.clone());
                         }
                     }
-                }
-
-                // Write config files
-                println!();
-                tui.print_line(Label::Cache, "writing config files", None);
-                let created = stack_store.write_files(&stack, &cwd)?;
-                for f in &created {
-                    tui.print_line(Label::Link, f, Some("created"));
-                }
-                if created.is_empty() {
-                    tui.print_line(Label::Info, "all config files already exist", Some("skipped"));
                 }
 
                 // Copy stack docs into project
@@ -313,7 +313,7 @@ async fn main() -> Result<()> {
         Command::Bun { subcmd } => match subcmd {
             BunSubcommand::Add { pkg } => {
                 let mut a = BunAdapter::new(config.clone(), db.clone(), cache.clone(), tui.clone(), docs_store);
-                a.add(&pkg)?;
+                a.add(&pkg, false)?;
             }
             BunSubcommand::Install { pkg } => {
                 let mut a = BunAdapter::new(config.clone(), db.clone(), cache.clone(), tui.clone(), docs_store);
@@ -328,7 +328,7 @@ async fn main() -> Result<()> {
         Command::Uv { subcmd } => match subcmd {
             UvSubcommand::Add { pkg } => {
                 let mut a = UvAdapter::new(config.clone(), db.clone(), cache.clone(), tui.clone(), docs_store);
-                a.add(&pkg)?;
+                a.add(&pkg, false)?;
             }
             UvSubcommand::Install { pkg } => {
                 let mut a = UvAdapter::new(config.clone(), db.clone(), cache.clone(), tui.clone(), docs_store);
@@ -347,7 +347,7 @@ async fn main() -> Result<()> {
         Command::Flutter { subcmd } => match subcmd {
             FlutterSubcommand::Add { pkg } => {
                 let mut a = FlutterAdapter::new(config.clone(), db.clone(), cache.clone(), tui.clone(), docs_store);
-                a.add(&pkg)?;
+                a.add(&pkg, false)?;
             }
             FlutterSubcommand::Install { pkg } => {
                 let mut a = FlutterAdapter::new(config.clone(), db.clone(), cache.clone(), tui.clone(), docs_store);
@@ -361,6 +361,20 @@ async fn main() -> Result<()> {
                 remove::remove_from_cache(&mut tui, &db, &pkg, "flutter")?;
             }
         },
+
+        Command::SelfUpdate => {
+            tui.print_line(Label::Info, "updating offpkg...", None);
+            let status = std::process::Command::new("sh")
+                .arg("-c")
+                .arg("curl -fsSL https://raw.githubusercontent.com/YOUR_USERNAME/offpkg/main/install.sh | bash")
+                .status()
+                .map_err(|e| anyhow::anyhow!("Failed to run updater: {}", e))?;
+            if status.success() {
+                tui.print_line(Label::Done, "offpkg updated", Some("restart terminal to use new version"));
+            } else {
+                tui.print_line(Label::Error, "update failed", Some("check your internet connection"));
+            }
+        }
 
         Command::Update { pkg, runtime } => {
             run_update(

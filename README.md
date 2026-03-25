@@ -1,7 +1,7 @@
 # offpkg 🛠️ Universal Offline Package Manager
 
 [![Rust](https://img.shields.io/badge/Rust-1.80%2B-blue?logo=rust)](https://www.rust-lang.org/)
-[![Version](https://img.shields.io/badge/version-0.1.0--beta-green)]()
+[![Version](https://img.shields.io/badge/version-0.1.1--beta-green)]()
 [![License](https://img.shields.io/badge/license-MIT-blue)]()
 
 **offpkg** is a high-performance, offline-first package manager for **Bun**, **Python uv**, and **Flutter**. Download packages once, use them anywhere — no internet required.
@@ -43,7 +43,7 @@ offpkg docs edit react           →    offpkg_docs/offpkg_react.md (every proje
 ╔═╗╔═╗╔═╗╔═╗╦╔═╔═╗
 ║ ║╠╣ ╠╣ ╠═╝╠╩╗║ ╦
 ╚═╝╚  ╚  ╩  ╩ ╩╚═╝
-offpkg v0.1.0 · universal offline package manager
+offpkg v0.1.1 · universal offline package manager
 ```
 
 ---
@@ -298,7 +298,7 @@ OFFPKG_CACHE_DIR=/external/drive offpkg bun install react
 ╔═╗╔═╗╔═╗╔═╗╦╔═╔═╗
 ║ ║╠╣ ╠╣ ╠═╝╠╩╗║ ╦
 ╚═╝╚  ╚  ╩  ╩ ╩╚═╝
-  offpkg v0.1.0 · universal offline package manager
+  offpkg v0.1.1 · universal offline package manager
 
 [ info  ]  offpkg doctor        running environment checks
 [ done  ]  bun                  bun 1.3.4
