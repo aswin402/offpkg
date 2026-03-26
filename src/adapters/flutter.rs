@@ -219,7 +219,7 @@ impl FlutterAdapter {
         bar.finish(&format!("{} resolved from local cache", pkg));
 
         // ── copy docs into project ────────────────────────────────────────
-        if self.docs.has_docs("flutter", &cached.name) {
+        if !skip_config && self.docs.has_docs("flutter", &cached.name) {
             let cwd = std::env::current_dir()?;
             let sp = self.tui.spinner("copying docs to project...");
             self.docs.copy_to_project("flutter", &cached.name, &cwd)?;
@@ -278,7 +278,7 @@ impl FlutterAdapter {
             ));
         }
 
-        if self.docs.has_docs("flutter", pkg) {
+        if !skip_config && self.docs.has_docs("flutter", pkg) {
             let sp = self.tui.spinner("copying docs to project...");
             self.docs.copy_to_project("flutter", pkg, &cwd)?;
             sp.finish(Label::Info, &format!("docs → offpkg_docs/{}.md", pkg), None);

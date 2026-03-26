@@ -45,7 +45,7 @@ offpkg docs edit react           →    offpkg_docs/offpkg_react.md (every proje
 ╔═╗╔═╗╔═╗╔═╗╦╔═╔═╗
 ║ ║╠╣ ╠╣ ╠═╝╠╩╗║ ╦
 ╚═╝╚  ╚  ╩  ╩ ╩╚═╝
-offpkg v0.1.1 · universal offline package manager
+offpkg v0.1.3 · universal offline package manager
 ```
 
 ---
@@ -301,7 +301,7 @@ OFFPKG_CACHE_DIR=/external/drive offpkg bun install react
 ╔═╗╔═╗╔═╗╔═╗╦╔═╔═╗
 ║ ║╠╣ ╠╣ ╠═╝╠╩╗║ ╦
 ╚═╝╚  ╚  ╩  ╩ ╩╚═╝
-  offpkg v0.1.1 · universal offline package manager
+  offpkg v0.1.3 · universal offline package manager
 
 [ info  ]  offpkg doctor        running environment checks
 [ done  ]  bun                  bun 1.3.4

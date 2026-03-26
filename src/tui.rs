@@ -385,7 +385,7 @@ impl TUI {
         println!("{}{}║ ║╠╣ ╠╣ ╠═╝╠╩╗║ ╦{}", BOLD, CYAN, RESET);
         println!("{}{}╚═╝╚  ╚  ╩  ╩ ╩╚═╝{}", BOLD, CYAN, RESET);
         println!(
-            "  {}offpkg v0.1.1 · universal offline package manager{}",
+            "  {}offpkg v0.1.3 · universal offline package manager{}",
             MUTED, RESET
         );
         println!();

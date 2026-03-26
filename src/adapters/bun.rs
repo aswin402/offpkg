@@ -229,7 +229,7 @@ impl BunAdapter {
         );
 
         // ── copy docs ─────────────────────────────────────────────────────
-        if self.docs.has_docs("bun", &cached.name) {
+        if !skip_config && self.docs.has_docs("bun", &cached.name) {
             match self.docs.copy_to_project("bun", &cached.name, &cwd) {
                 Ok(dest) => {
                     self.tui

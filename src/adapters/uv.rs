@@ -27,7 +27,7 @@ impl UvAdapter {
         }
     }
 
-    pub fn add(&mut self, pkg: &str, _skip_config: bool, _is_dev: bool) -> Result<()> {
+    pub fn add(&mut self, pkg: &str, skip_config: bool, _is_dev: bool) -> Result<()> {
         let start = Instant::now();
 
         let sp = self
@@ -121,7 +121,7 @@ impl UvAdapter {
         bar.finish(&format!("{} added to .venv", pkg));
 
         // ── copy docs into project ────────────────────────────────────────
-        if self.docs.has_docs("uv", &cached.name) {
+        if !skip_config && self.docs.has_docs("uv", &cached.name) {
             let cwd = std::env::current_dir()?;
             let sp = self.tui.spinner("copying docs to project...");
             self.docs.copy_to_project("uv", &cached.name, &cwd)?;

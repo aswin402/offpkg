@@ -231,12 +231,6 @@ async fn main() -> Result<()> {
                 println!();
 
                 let cwd = std::env::current_dir()?;
-                let all_pkgs: Vec<String> = stack
-                    .packages
-                    .iter()
-                    .chain(stack.dev_packages.iter())
-                    .cloned()
-                    .collect();
 
                 // Write config files
                 println!();
@@ -295,13 +289,6 @@ async fn main() -> Result<()> {
                 for pkg in &stack.packages { run_add(pkg, false, false); }
                 for pkg in &stack.dev_packages { run_add(pkg, false, true); }
                 for pkg in &stack.transitive_packages { run_add(pkg, true, false); }
-
-                // Copy stack docs into project
-                for pkg in &all_pkgs {
-                    if docs_store.has_docs(&stack.runtime, pkg) {
-                        let _ = docs_store.copy_to_project(&stack.runtime, pkg, &cwd);
-                    }
-                }
 
                 println!();
                 tui.print_line(
