@@ -3,12 +3,16 @@ use clap::{Parser, Subcommand};
 #[derive(Parser)]
 #[command(
     name = "offpkg",
-    version = "0.1.0",
-    about = "Universal offline package manager"
+    version = "0.1.4",
+    about = "Universal offline package manager",
+    disable_version_flag = true
 )]
 pub struct Args {
+    #[arg(short = 'V', long = "version")]
+    pub version: bool,
+
     #[command(subcommand)]
-    pub command: Command,
+    pub command: Option<Command>,
 }
 
 #[derive(Subcommand)]

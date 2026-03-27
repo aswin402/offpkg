@@ -28,7 +28,7 @@ use crate::stacks::StackStore;
 use crate::tui::{Label, TUI};
 use crate::update::run_update;
 use anyhow::{anyhow, Context, Result};
-use clap::Parser;
+use clap::{CommandFactory, Parser};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -40,7 +40,21 @@ async fn main() -> Result<()> {
     let docs_store = DocsStore::new(config.clone());
     let stack_store = StackStore::new(config.clone());
 
-    match cli.command {
+    if cli.version {
+        tui.render_logo();
+        return Ok(());
+    }
+
+    let command = match cli.command {
+        Some(cmd) => cmd,
+        None => {
+            Args::command().print_help()?;
+            println!();
+            return Ok(());
+        }
+    };
+
+    match command {
         Command::List { runtime } => {
             tui.render_logo();
             let pkgs = db.list_packages(runtime.as_deref())?;
