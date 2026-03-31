@@ -433,6 +433,25 @@ async fn main() -> Result<()> {
             BunSubcommand::Remove { pkg } => {
                 remove::remove_from_cache(&mut tui, &db, &pkg, "bun")?;
             }
+            BunSubcommand::List => {
+                tui.render_logo();
+                let pkgs = db.list_packages(Some("bun"))?;
+                tui.print_line(
+                    Label::Info,
+                    &format!("{} bun packages cached:", pkgs.len()),
+                    None,
+                );
+                for pkg in pkgs {
+                    tui.print_line(
+                        Label::Done,
+                        &format!("{}@{}", pkg.name, pkg.version),
+                        Some(&pkg.cache_path),
+                    );
+                }
+            }
+            BunSubcommand::Update { pkg } => {
+                run_update(&mut tui, &db, &cache, &config, pkg.as_deref(), Some("bun")).await?;
+            }
         },
 
         // ── UV ────────────────────────────────────────────────────────────
@@ -470,6 +489,25 @@ async fn main() -> Result<()> {
             UvSubcommand::Remove { pkg } => {
                 remove::remove_from_cache(&mut tui, &db, &pkg, "uv")?;
             }
+            UvSubcommand::List => {
+                tui.render_logo();
+                let pkgs = db.list_packages(Some("uv"))?;
+                tui.print_line(
+                    Label::Info,
+                    &format!("{} uv packages cached:", pkgs.len()),
+                    None,
+                );
+                for pkg in pkgs {
+                    tui.print_line(
+                        Label::Done,
+                        &format!("{}@{}", pkg.name, pkg.version),
+                        Some(&pkg.cache_path),
+                    );
+                }
+            }
+            UvSubcommand::Update { pkg } => {
+                run_update(&mut tui, &db, &cache, &config, pkg.as_deref(), Some("uv")).await?;
+            }
         },
 
         // ── Flutter ───────────────────────────────────────────────────────
@@ -506,6 +544,25 @@ async fn main() -> Result<()> {
             }
             FlutterSubcommand::Remove { pkg } => {
                 remove::remove_from_cache(&mut tui, &db, &pkg, "flutter")?;
+            }
+            FlutterSubcommand::List => {
+                tui.render_logo();
+                let pkgs = db.list_packages(Some("flutter"))?;
+                tui.print_line(
+                    Label::Info,
+                    &format!("{} flutter packages cached:", pkgs.len()),
+                    None,
+                );
+                for pkg in pkgs {
+                    tui.print_line(
+                        Label::Done,
+                        &format!("{}@{}", pkg.name, pkg.version),
+                        Some(&pkg.cache_path),
+                    );
+                }
+            }
+            FlutterSubcommand::Update { pkg } => {
+                run_update(&mut tui, &db, &cache, &config, pkg.as_deref(), Some("flutter")).await?;
             }
         },
 
