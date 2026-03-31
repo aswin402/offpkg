@@ -6,26 +6,26 @@ pub fn mern() -> Stack {
         runtime: "bun".into(),
         description: "MERN Stack - Express + React + MongoDB + TypeScript (Monorepo)".into(),
         packages: vec![
-            "express@^4.19.2".into(),
-            "cors@^2.8.5".into(),
-            "mongoose@^8.5.1".into(),
-            "dotenv@^16.4.5".into(),
-            "bcryptjs@^2.4.3".into(),
-            "jsonwebtoken@^9.0.2".into(),
+            "express".into(),
+            "cors".into(),
+            "mongoose".into(),
+            "dotenv".into(),
+            "bcryptjs".into(),
+            "jsonwebtoken".into(),
             "react".into(),
             "react-dom".into(),
         ],
         dev_packages: vec![
-            "typescript@^5.5.3".into(),
-            "@types/node@^22.5.0".into(),
-            "@types/express@^4.17.21".into(),
-            "@types/cors@^2.8.17".into(),
-            "@types/bcryptjs@^2.4.6".into(),
-            "@types/jsonwebtoken@^9.0.6".into(),
+            "typescript".into(),
+            "@types/node".into(),
+            "@types/express".into(),
+            "@types/cors".into(),
+            "@types/bcryptjs".into(),
+            "@types/jsonwebtoken".into(),
             "@types/react".into(),
             "@types/react-dom".into(),
-            "tsx@^4.19.1".into(),
-            "nodemon@^3.1.4".into(),
+            "tsx".into(),
+            "nodemon".into(),
             "vite".into(),
             "@vitejs/plugin-react".into(),
             "tailwindcss".into(),
@@ -45,22 +45,22 @@ pub fn mern() -> Stack {
     "start": "tsx src/app.ts"
   },
   "dependencies": {
-    "express": "^4.19.2",
-    "cors": "^2.8.5",
-    "mongoose": "^8.5.1",
-    "dotenv": "^16.4.5",
-    "bcryptjs": "^2.4.3",
-    "jsonwebtoken": "^9.0.2"
+    "express": "",
+    "cors": "",
+    "mongoose": "",
+    "dotenv": "",
+    "bcryptjs": "",
+    "jsonwebtoken": ""
   },
   "devDependencies": {
-    "typescript": "^5.5.3",
-    "@types/node": "^22.5.0",
-    "@types/express": "^4.17.21",
-    "@types/cors": "^2.8.17",
-    "@types/bcryptjs": "^2.4.6",
-    "@types/jsonwebtoken": "^9.0.6",
-    "tsx": "^4.19.1",
-    "nodemon": "^3.1.4"
+    "typescript": "",
+    "@types/node": "",
+    "@types/express": "",
+    "@types/cors": "",
+    "@types/bcryptjs": "",
+    "@types/jsonwebtoken": "",
+    "tsx": "",
+    "nodemon": ""
   }
 }"##.into(),
                 binary_content: None,
@@ -259,7 +259,7 @@ export default {
     "dev": "concurrently \"bun dev:backend\" \"bun dev:frontend\""
   },
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": ""
   }
 }"##.into(),
                 binary_content: None,

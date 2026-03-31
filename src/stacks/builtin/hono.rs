@@ -64,21 +64,21 @@ pub fn hono_full() -> Stack {
         runtime: "bun".into(),
         description: "Hono + Prisma + Zod + Pino + Better Auth (Prisma Adapter)".into(),
         packages: vec![
-            "hono@^4.5.1".into(),
+            "hono".into(),
             "better-auth".into(),
-            "@prisma/client@^5.15.0".into(),
-            "zod@^3.23.8".into(),
-            "pino@^9.2.0".into(),
-            "@prisma/adapter-pg@^5.15.0".into(),
-            "dotenv@^16.4.5".into(),
-            "pg@^8.12.0".into(),
+            "@prisma/client".into(),
+            "zod".into(),
+            "pino".into(),
+            "@prisma/adapter-pg".into(),
+            "dotenv".into(),
+            "pg".into(),
         ],
         dev_packages: vec![
-            "typescript@^5.5.3".into(),
-            "@types/node@^22.5.0".into(),
-            "pino-pretty@^11.2.2".into(),
-            "prisma@^5.15.0".into(),
-            "@types/pg@^8.11.6".into(),
+            "typescript".into(),
+            "@types/node".into(),
+            "pino-pretty".into(),
+            "prisma".into(),
+            "@types/pg".into(),
         ],
         transitive_packages: vec![],
         files: vec![
@@ -94,21 +94,21 @@ pub fn hono_full() -> Stack {
     "format": "echo \"no formatter configured\""
   },
   "dependencies": {
-    "hono": "^4.5.1",
-    "better-auth": "latest",
-    "@prisma/client": "^5.15.0",
-    "zod": "^3.23.8",
-    "pino": "^9.2.0",
-    "@prisma/adapter-pg": "^5.15.0",
-    "dotenv": "^16.4.5",
-    "pg": "^8.12.0"
+    "hono": "",
+    "better-auth": "",
+    "@prisma/client": "",
+    "zod": "",
+    "pino": "",
+    "@prisma/adapter-pg": "",
+    "dotenv": "",
+    "pg": ""
   },
   "devDependencies": {
-    "typescript": "^5.5.3",
-    "@types/node": "^22.5.0",
-    "prisma": "^5.15.0",
-    "pino-pretty": "^11.2.2",
-    "@types/pg": "^8.11.6"
+    "typescript": "",
+    "@types/node": "",
+    "prisma": "",
+    "pino-pretty": "",
+    "@types/pg": ""
   }
 }
 "##.into(),
