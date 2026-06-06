@@ -6,7 +6,7 @@
 
 <p align="center">
   <a href="https://www.rust-lang.org/"><img src="https://img.shields.io/badge/Rust-1.80%2B-blue?logo=rust" alt="Rust"/></a>
-  <img src="https://img.shields.io/badge/version-0.1.5-green" alt="Version"/>
+  <img src="https://img.shields.io/badge/version-0.1.6-green" alt="Version"/>
   <img src="https://img.shields.io/badge/license-MIT-blue" alt="License"/>
 </p>
 
@@ -59,7 +59,7 @@ offpkg docs edit react           →    offpkg_docs/offpkg_react.md (every proje
 ╔═╗╔═╗╔═╗╔═╗╦╔═╔═╗
 ║ ║╠╣ ╠╣ ╠═╝╠╩╗║ ╦
 ╚═╝╚  ╚  ╩  ╩ ╩╚═╝
-offpkg v0.1.5 · universal offline package manager
+offpkg v0.1.6 · universal offline package manager
 ```
 
 ---

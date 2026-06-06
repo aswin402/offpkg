@@ -148,15 +148,18 @@ async fn main() -> Result<()> {
                     .cloned()
                     .collect();
 
+                let mut cached_pkgs: std::collections::HashSet<String> = db
+                    .list_packages(Some(&stack.runtime))?
+                    .into_iter()
+                    .map(|p| p.name)
+                    .collect();
+
                 let mut success = 0;
                 let mut failed: Vec<String> = vec![];
 
                 for pkg in &all_pkgs {
                     // Skip if already cached
-                    let already = db
-                        .list_packages(Some(&stack.runtime))?
-                        .into_iter()
-                        .any(|p| p.name == *pkg);
+                    let already = cached_pkgs.contains(pkg);
 
                     if already {
                         tui.print_line(Label::Cache, pkg, Some("already cached, skipping"));
@@ -199,7 +202,10 @@ async fn main() -> Result<()> {
                     };
 
                     match result {
-                        Ok(_) => success += 1,
+                        Ok(_) => {
+                            success += 1;
+                            cached_pkgs.insert(pkg.clone());
+                        }
                         Err(e) => {
                             tui.print_line(
                                 Label::Warn,

@@ -3,7 +3,7 @@ use clap::{Parser, Subcommand};
 #[derive(Parser)]
 #[command(
     name = "offpkg",
-    version = "0.1.5",
+    version = "0.1.6",
     about = "Universal offline package manager — cache packages once, install forever",
     long_about = "offpkg caches packages from npm (bun), PyPI (uv), and pub.dev (flutter)\nso you can install them later without an internet connection.\n\nWorkflow:\n  1. Cache packages online  →  offpkg <runtime> install <pkg>\n  2. Add to project offline →  offpkg <runtime> add <pkg>",
     disable_version_flag = true

@@ -307,15 +307,18 @@ impl FlutterAdapter {
             None,
         );
 
+        let mut cached_pkgs: std::collections::HashSet<String> = self
+            .db
+            .list_packages(Some("flutter"))?
+            .into_iter()
+            .map(|p| p.name)
+            .collect();
+
         let mut success = 0;
         let mut failed: Vec<String> = vec![];
 
         for pkg in &pkg_names {
-            let already = self
-                .db
-                .list_packages(Some("flutter"))?
-                .into_iter()
-                .any(|p| p.name == *pkg);
+            let already = cached_pkgs.contains(pkg);
             if already {
                 self.tui
                     .print_line(Label::Cache, pkg, Some("already cached, skipping"));
@@ -323,7 +326,10 @@ impl FlutterAdapter {
                 continue;
             }
             match self.install(pkg).await {
-                Ok(_) => success += 1,
+                Ok(_) => {
+                    success += 1;
+                    cached_pkgs.insert(pkg.clone());
+                }
                 Err(e) => {
                     self.tui.print_line(
                         Label::Warn,
