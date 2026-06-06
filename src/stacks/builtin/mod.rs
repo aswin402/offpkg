@@ -12,6 +12,7 @@ pub fn builtin_stacks() -> Vec<Stack> {
         // ── Bun / React ───────────────────────────────────────────
         react_vite::react_vite(),
         react_vite::react_vite_full(),
+        react_vite::react_vite_gsap(),
         // ── Bun / API ─────────────────────────────────────────────
         hono::hono_api(),
         hono::hono_full(),
