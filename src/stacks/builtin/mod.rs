@@ -2,6 +2,7 @@ mod fastapi;
 mod flutter;
 mod hono;
 mod mern;
+mod next_template;
 mod pern;
 mod react_vite;
 
@@ -17,6 +18,7 @@ pub fn builtin_stacks() -> Vec<Stack> {
         hono::hono_api(),
         hono::hono_full(),
         // ── Bun / Fullstack ───────────────────────────────────────
+        next_template::next_template(),
         mern::mern(),
         pern::pern(),
         // ── Python ────────────────────────────────────────────────

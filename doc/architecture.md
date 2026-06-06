@@ -1,4 +1,10 @@
-# Architecture
+# 🏗️ Architecture
+
+<p align="center">
+  <img src="logo.png" alt="offpkg Logo" width="180px"/>
+</p>
+
+---
 
 ## High-Level Overview
 

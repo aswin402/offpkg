@@ -1,4 +1,10 @@
-# Usage Guide
+# 🛠️ Usage Guide
+
+<p align="center">
+  <img src="logo.png" alt="offpkg Logo" width="180px"/>
+</p>
+
+---
 
 ## Full CLI Reference
 

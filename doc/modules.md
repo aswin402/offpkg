@@ -1,4 +1,10 @@
-# Modules Guide
+# 🧩 Modules Guide
+
+<p align="center">
+  <img src="logo.png" alt="offpkg Logo" width="180px"/>
+</p>
+
+---
 
 ## src/main.rs
 Entry point. Initializes Config, Database, Cache, DocsStore, StackStore, TUI.

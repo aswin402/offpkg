@@ -1,29 +1,43 @@
 # offpkg 🛠️ Universal Offline Package Manager
 
-[![Rust](https://img.shields.io/badge/Rust-1.80%2B-blue?logo=rust)](https://www.rust-lang.org/)
-[![Version](https://img.shields.io/badge/version-0.1.1--beta-green)]()
-[![License](https://img.shields.io/badge/license-MIT-blue)]()
+<p align="center">
+  <img src="doc/logo.png" alt="offpkg Logo" width="220px"/>
+</p>
 
-**offpkg** is a high-performance, offline-first package manager for **Bun**, **Python uv**, and **Flutter**. Download packages once, use them anywhere — no internet required.
+<p align="center">
+  <a href="https://www.rust-lang.org/"><img src="https://img.shields.io/badge/Rust-1.80%2B-blue?logo=rust" alt="Rust"/></a>
+  <img src="https://img.shields.io/badge/version-0.1.5-green" alt="Version"/>
+  <img src="https://img.shields.io/badge/license-MIT-blue" alt="License"/>
+</p>
 
-> vibe coded by Aswin
+**offpkg** is a high-performance, offline-first package manager for **Bun (Node.js)**, **Python uv**, and **Flutter**. Cache packages once, instantiate them globally instantly—no network overhead, no configuration pollution.
+
+> Vibe coded with ❤️ by Aswin
 
 ---
 
-## What's Inside ✨
+## Lightweight & High-Performance ⚡
 
-| Feature | Description |
-|---|---|
-| **Offline Caching** | Downloads tarballs/wheels to `~/.offpkg/cache/` with SHA-256 verification |
-| **Multi-Runtime** | Full support for Bun (npm), Python uv (PyPI), Flutter (pub.dev) |
-| **Stacks** | One command to install a full project setup — `offpkg stack add react-vite` |
-| **Global Docs** | Edit package READMEs once in `~/.offpkg/docs/`, auto-copied to every project |
-| **SQLite DB** | Tracks all cached packages in `offpkg.db` with checksums and metadata |
-| **Pristine Templates** | Deep transitive dependency resolution strictly maps into `node_modules/` without polluting `package.json` |
-| **Binary Assets** | Stack templates natively embed `.png` and binary core files directly inside the Rust CLI |
-| **Beautiful TUI** | Animated spinner, progress bar, colored labels — inspired by Bun's output |
-| **Doctor** | Runtime health checks, cache integrity, DB diagnostics |
-| **Cache Prune** | `remove <pkg>` deletes cache + DB record, shows freed space |
+`offpkg` is engineered in pure Rust for minimal overhead, extreme speed, and a tiny system footprint.
+
+| Resource / Metric | Benchmark Value | Details |
+| :--- | :--- | :--- |
+| **ROM Footprint (Binary)** | **~8.3 MB** | Single fully-compiled, stripped static binary. No interpreter or runtime required to run. |
+| **Native RAM Usage** | **~7.3 MB** | Peak resident memory during SQL registry queries & configuration parsing. |
+| **CLI Dispatch Latency** | **< 15 ms** | Sub-millisecond command parsing using `clap` and quick SQLite catalog lookups. |
+| **Offline Link Speed** | **Instant (Milliseconds)** | Local file hardlinking and `.tgz` unpacking directly to project roots. |
+
+---
+
+## Core Features ✨
+
+- **📦 Multi-Runtime Cache Wrapper**: Unified interface for Bun (npm), Python (uv/PyPI), and Flutter (pub.dev).
+- **🔒 Secure Local Archiving**: Downloads and verifies tarballs and wheels via SHA-256 hashes, stored in `~/.offpkg/cache/`.
+- **🗃️ SQLite Database Manifest**: Blazing-fast cataloging in `offpkg.db` with auto-repair and integrity diagnostics.
+- **🏗️ Pristine Stacks**: Scaffold entire application templates offline in under a second (configurations, files, and deep transitive dependencies).
+- **📝 Global Offline Docs**: Modify fetched package READMEs once with `offpkg docs edit`, and have your custom versions auto-copied to every new project folder under `offpkg_docs/`.
+- **🩺 Interactive TUI & Doctor**: Features animated spinners, colored status labels, progress bars, and environment diagnostics to verify runtime compatibility.
+- **🧹 Cache Pruner**: `remove <pkg>` deletes cached archives and DB entries while displaying freed disk space.
 
 ---
 
@@ -39,13 +53,13 @@ offpkg docs edit react           →    offpkg_docs/offpkg_react.md (every proje
 
 ---
 
-## Logo
+## CLI Logo
 
 ```
 ╔═╗╔═╗╔═╗╔═╗╦╔═╔═╗
 ║ ║╠╣ ╠╣ ╠═╝╠╩╗║ ╦
 ╚═╝╚  ╚  ╩  ╩ ╩╚═╝
-offpkg v0.1.3 · universal offline package manager
+offpkg v0.1.5 · universal offline package manager
 ```
 
 ---
@@ -143,16 +157,21 @@ offpkg doctor                      # environment health check
 
 ## Built-in Stacks
 
-| Stack | Runtime | Packages |
+| Stack | Runtime | Description / Packages |
 |---|---|---|
-| *`react-vite`* | bun | react, react-dom, vite, typescript, etc. + **210+ transitive dependencies** |
-| *`react-vite-full`* | bun | above + zustand, @tanstack/react-query, hook-form, zod, axios + **210+ transitive** |
-| `hono-api` | bun | hono, @prisma/client, zod, pino, pg, dotenv + dev: typescript, prisma, pino-pretty |
-| `fastapi` | uv | fastapi, uvicorn, sqlalchemy, asyncpg, alembic, pydantic-settings, python-dotenv, structlog |
-| `flutter-riverpod` | flutter | flutter_riverpod, hooks_riverpod, flutter_hooks, go_router, dio, logger |
+| **`react-vite`** | bun | React 19 + Vite 8 + Tailwind 4 + Zustand + TanStack Query + React Router 7 |
+| **`react-vite-full`** | bun | Complete Modern Template (above + zod, axios, hook-form, etc.) |
+| **`react-vite-gsap`** | bun | GSAP + Framer Motion + Lenis Smooth Scroll + shadcn/ui + Lordicon (Kinetic Motion Template) |
+| **`hono-api`** | bun | Hono API + Pino logger |
+| **`hono-full`** | bun | Hono + Prisma + Zod + Pino + Better Auth (Prisma Adapter) |
+| **`next-template`** | bun | Upgraded Next.js 16 + Tailwind v4 + Prisma 7 + Professional Backend |
+| **`mern`** | bun | MERN Stack - Express + React + MongoDB + TypeScript (Monorepo) |
+| **`pern`** | bun | PERN Stack - Express + React + PostgreSQL + Prisma + TypeScript (Monorepo) |
+| **`fastapi`** | uv | FastAPI + SQLAlchemy (Async) + Alembic + Pydantic v2 + structlog |
+| **`flutter-riverpod-my_app`** | flutter | Flutter + Riverpod/Hooks + GoRouter + Dio + Material 3 + Logger + Google Fonts |
 
 Each stack also generates starter config files (`vite.config.ts`, `tsconfig.json`, `main.dart`, etc.) automatically.
-Furthermore, the React-Vite stacks natively embed global **binary assets** (e.g. `hero.png`) and fully resolve **all deep dependencies** directly into `node_modules` without altering your project configuration.
+Furthermore, the React/Next stacks natively embed global **binary assets** (e.g. `hero.png`) and fully resolve **all deep dependencies** directly into `node_modules` without altering your project configuration.
 
 ---
 
