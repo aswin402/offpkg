@@ -1,0 +1,227 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" width="100%" height="100%">
+  <defs>
+    <!-- Fonts -->
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@700;800&amp;display=swap');
+      
+      :root {
+        --cyan-neon: #00d4e0;
+        --blue-neon: #3b82f6;
+        --purple-neon: #a855f7;
+        --warning-neon: #ff3b30;
+        --bg-box-left: url(#left-grad);
+        --bg-box-right: url(#right-grad);
+      }
+
+      /* Base Styles */
+      text {
+        font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      }
+
+      /* Float Animation for the main logo box */
+      @keyframes float {
+        0% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-12px) rotate(0.8deg); }
+        100% { transform: translateY(0px) rotate(0deg); }
+      }
+      
+      .floating-group {
+        animation: float 6s ease-in-out infinite;
+        transform-origin: 300px 280px;
+      }
+
+      /* Pulse glow animations */
+      @keyframes neon-pulse {
+        0% { opacity: 0.8; filter: drop-shadow(0 0 2px var(--cyan-neon)); }
+        50% { opacity: 1.0; filter: drop-shadow(0 0 8px var(--cyan-neon)); }
+        100% { opacity: 0.8; filter: drop-shadow(0 0 2px var(--cyan-neon)); }
+      }
+      
+      .pulse-cyan {
+        animation: neon-pulse 3s ease-in-out infinite;
+      }
+
+      @keyframes neon-pulse-blue {
+        0% { opacity: 0.7; filter: drop-shadow(0 0 2px var(--blue-neon)); }
+        50% { opacity: 1.0; filter: drop-shadow(0 0 8px var(--blue-neon)); }
+        100% { opacity: 0.7; filter: drop-shadow(0 0 2px var(--blue-neon)); }
+      }
+
+      .pulse-blue {
+        animation: neon-pulse-blue 3.5s ease-in-out infinite;
+      }
+
+      /* Wi-Fi Waves propagation animation */
+      @keyframes wifi-wave {
+        0% { opacity: 0.2; }
+        30% { opacity: 1.0; }
+        60% { opacity: 0.2; }
+        100% { opacity: 0.2; }
+      }
+      
+      .wifi-arc-1 { animation: wifi-wave 2.5s infinite 0.0s; }
+      .wifi-arc-2 { animation: wifi-wave 2.5s infinite 0.5s; }
+      .wifi-arc-3 { animation: wifi-wave 2.5s infinite 1.0s; }
+
+      /* Slash Warning Pulsing */
+      @keyframes slash-glow {
+        0% { stroke: var(--cyan-neon); filter: drop-shadow(0 0 2px var(--cyan-neon)); }
+        50% { stroke: var(--warning-neon); filter: drop-shadow(0 0 10px var(--warning-neon)); }
+        100% { stroke: var(--cyan-neon); filter: drop-shadow(0 0 2px var(--cyan-neon)); }
+      }
+      
+      .slash-line {
+        animation: slash-glow 4s ease-in-out infinite;
+      }
+
+      /* Orbital Caching Rings */
+      @keyframes orbit-cw {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
+      
+      @keyframes orbit-ccw {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(-360deg); }
+      }
+
+      .orbital-ring-1 {
+        transform-origin: 300px 280px;
+        animation: orbit-cw 20s linear infinite;
+      }
+
+      .orbital-ring-2 {
+        transform-origin: 300px 280px;
+        animation: orbit-ccw 25s linear infinite;
+      }
+
+      /* Text Glow */
+      .glowing-text {
+        filter: drop-shadow(0 0 6px rgba(0, 212, 224, 0.4));
+      }
+    </style>
+
+    <!-- Gradients -->
+    <linearGradient id="left-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e1b4b" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#0f172a" stop-opacity="0.95"/>
+    </linearGradient>
+
+    <linearGradient id="right-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#020617" stop-opacity="0.95"/>
+    </linearGradient>
+
+    <linearGradient id="flap-grad-left" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#1e1b4b"/>
+      <stop offset="100%" stop-color="#312e81"/>
+    </linearGradient>
+
+    <linearGradient id="flap-grad-right" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1d4ed8"/>
+      <stop offset="100%" stop-color="#1e3a8a"/>
+    </linearGradient>
+
+    <linearGradient id="text-cyan-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00f2fe"/>
+      <stop offset="100%" stop-color="#4facfe"/>
+    </linearGradient>
+
+    <!-- Neon Glow Filters -->
+    <filter id="neon-glow-cyan" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Transparent Background (No background rect to keep it transparent) -->
+
+  <!-- Outer Ambient Orbits (Offline Package caching representation) -->
+  <g class="orbital-ring-1" opacity="0.25">
+    <ellipse cx="300" cy="280" rx="260" ry="120" fill="none" stroke="url(#text-cyan-grad)" stroke-width="1.5" stroke-dasharray="10 15" />
+    <circle cx="60" cy="280" r="6" fill="#00d4e0" filter="url(#neon-glow-cyan)"/>
+  </g>
+  <g class="orbital-ring-2" opacity="0.2">
+    <ellipse cx="300" cy="280" rx="230" ry="105" fill="none" stroke="#3b82f6" stroke-width="1" stroke-dasharray="5 10" />
+    <circle cx="530" cy="280" r="5" fill="#3b82f6" />
+  </g>
+
+  <!-- MAIN FLOATING GROUP -->
+  <g class="floating-group">
+    
+    <!-- Isometric Open Box Back & Inside Walls (Draw first for proper Z-ordering) -->
+    <!-- Inside Back Wall -->
+    <polygon points="300,310 300,170 420,240" fill="#090d16" stroke="#1e293b" stroke-width="1" />
+    <polygon points="300,310 300,170 180,240" fill="#131525" stroke="#1e293b" stroke-width="1" />
+
+    <!-- Left isometric face -->
+    <polygon points="300,310 180,240 180,360 300,430" fill="url(#left-grad)" stroke="var(--cyan-neon)" stroke-width="3" class="pulse-cyan" />
+    
+    <!-- Right isometric face -->
+    <polygon points="300,310 420,240 420,360 300,430" fill="url(#right-grad)" stroke="var(--blue-neon)" stroke-width="3" class="pulse-blue" />
+    
+    <!-- Front isometric center seam accent line -->
+    <line x1="300" y1="310" x2="300" y2="430" stroke="#1e293b" stroke-width="2" />
+
+    <!-- Cardboard Box Flaps -->
+    <!-- Top-Left Flap (Attached to 180,240 -> 300,310, folded back/outward) -->
+    <polygon points="180,240 300,310 230,225 110,155" fill="url(#flap-grad-left)" stroke="var(--cyan-neon)" stroke-width="2" />
+
+    <!-- Top-Right Flap (Attached to 300,310 -> 420,240, folded wide open up-right) -->
+    <polygon points="300,310 420,240 480,140 360,210" fill="url(#flap-grad-right)" stroke="var(--blue-neon)" stroke-width="2.5" />
+
+    <!-- Back-Left Flap (Attached to 180,240 -> 300,170) -->
+    <polygon points="180,240 300,170 270,120 150,190" fill="#171725" stroke="#334155" stroke-width="1.5" />
+
+    <!-- Back-Right Flap (Attached to 300,170 -> 420,240) -->
+    <polygon points="300,170 420,240 450,190 330,120" fill="#0c0f1d" stroke="#334155" stroke-width="1.5" />
+
+    <!-- Left Face Details: Offline Wi-Fi Symbol projected on left face (matrix transforms 2D to Left Iso plane) -->
+    <!-- Left Iso Matrix: matrix(0.866, 0.5, 0, 1, 180, 240) -->
+    <g transform="matrix(0.866, 0.5, 0, 1, 180, 240)">
+      
+      <!-- Wi-Fi Dot -->
+      <circle cx="25" cy="95" r="7" fill="var(--cyan-neon)" class="wifi-arc-1" />
+      
+      <!-- Wi-Fi Arc 1 -->
+      <path d="M 25 65 A 30 30 0 0 1 55 95" fill="none" stroke="var(--cyan-neon)" stroke-width="6.5" stroke-linecap="round" class="wifi-arc-2" />
+      
+      <!-- Wi-Fi Arc 2 -->
+      <path d="M 25 35 A 60 60 0 0 1 85 95" fill="none" stroke="var(--cyan-neon)" stroke-width="6.5" stroke-linecap="round" class="wifi-arc-3" />
+
+      <!-- Wi-Fi Arc 3 (Outer) -->
+      <path d="M 25 5 A 90 90 0 0 1 115 95" fill="none" stroke="var(--cyan-neon)" stroke-width="6.5" stroke-linecap="round" opacity="0.8" class="wifi-arc-1" />
+
+      <!-- Thick Slash Line (Diagonal) -->
+      <line x1="8" y1="105" x2="110" y2="10" stroke="var(--cyan-neon)" stroke-width="11" stroke-linecap="round" class="slash-line" />
+      <!-- Inner core of the slash for high-tech contrast -->
+      <line x1="8" y1="105" x2="110" y2="10" stroke="#ffffff" stroke-width="3" stroke-linecap="round" opacity="0.9" />
+
+    </g>
+
+    <!-- Right Face Details: Tech Lines projected on right face -->
+    <!-- Right Iso Matrix: matrix(0.866, -0.5, 0, 1, 300, 310) -->
+    <g transform="matrix(0.866, -0.5, 0, 1, 300, 310)">
+      <!-- Subtle internal circuitry lines on the box representing storage/database -->
+      <path d="M 20,40 L 60,40 L 80,60" fill="none" stroke="#2563eb" stroke-width="2.5" opacity="0.6" stroke-linecap="round" />
+      <circle cx="80" cy="60" r="3" fill="var(--blue-neon)" opacity="0.8" />
+      
+      <path d="M 30,80 L 80,80 L 100,60" fill="none" stroke="#2563eb" stroke-width="2.5" opacity="0.6" stroke-linecap="round" />
+      <circle cx="100" cy="60" r="3" fill="var(--blue-neon)" opacity="0.8" />
+    </g>
+
+  </g>
+
+  <!-- LOGO TEXT "offpkg" WITH NEON GLOW -->
+  <g transform="translate(300, 525)" class="glowing-text">
+    <text text-anchor="middle" font-size="64" font-weight="800" letter-spacing="-1">
+      <!-- "off" in glowing cyan -->
+      <tspan fill="url(#text-cyan-grad)">off</tspan>
+      <!-- "pkg" in pristine white -->
+      <tspan fill="#ffffff">pkg</tspan>
+    </text>
+  </g>
+</svg>

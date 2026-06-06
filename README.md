@@ -1,7 +1,7 @@
 # offpkg 🛠️ Universal Offline Package Manager
 
 <p align="center">
-  <img src="doc/logo.png" alt="offpkg Logo" width="220px"/>
+  <img src="doc/logo.svg" alt="offpkg Logo" width="220px"/>
 </p>
 
 <p align="center">
