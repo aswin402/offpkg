@@ -82,7 +82,7 @@ import "./.next/types/routes.d.ts";
             },
             StackFile {
                 path: "README.md".into(),
-                content: r###"# Offpkg Next.js Full-Stack Starter Template 🚀
+                content: r###"# <img src="https://raw.githubusercontent.com/aswin402/offpkg/main/doc/logo.svg" alt="offpkg Logo" width="36" height="36" align="center"/> Offpkg Next.js Full-Stack Starter Template 🚀
 
 Welcome to your upgraded, high-performance project template built with the latest modern web technologies. This project is optimized for speed, security, and developer experience.
 
@@ -540,8 +540,10 @@ export function Navbar() {
     <>
       <nav className="fixed top-0 left-0 right-0 h-16 border-b border-border/40 bg-background/80 backdrop-blur-md z-40 flex items-center justify-between px-6 transition-colors duration-300">
         <div className="flex items-center gap-8">
-          <a href="#" className="text-xl font-bold tracking-tight text-primary hover:opacity-80 transition-opacity">
-            OFFPKG <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full ml-1 font-normal">NEXT</span>
+          <a href="#" className="text-xl font-bold tracking-tight text-primary hover:opacity-80 transition-opacity flex items-center gap-2">
+            <img src="https://raw.githubusercontent.com/aswin402/offpkg/main/doc/logo.svg" alt="Offpkg Logo" className="w-6 h-6" />
+            <span>OFFPKG</span>
+            <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full ml-1 font-normal">NEXT</span>
           </a>
           <div className="hidden md:flex items-center gap-6">
             <a href="#hero" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5">

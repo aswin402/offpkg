@@ -24,13 +24,14 @@ pub fn flutter_riverpod(app_name: Option<&str>) -> Stack {
             "go_router".into(),
             "hooks_riverpod".into(),
             "dio".into(),
+            "flutter_svg".into(),
         ],
         dev_packages: vec![],
         transitive_packages: vec![],
         files: vec![
             StackFile {
                 path: "OFFPKG_README.md".into(),
-                content: r##"# Offpkg Flutter App
+                content: r##"# <img src="https://raw.githubusercontent.com/aswin402/offpkg/main/doc/logo.svg" alt="offpkg Logo" width="36" height="36" align="center"/> Offpkg Flutter App
 
 A modern, scalable Flutter application serving as the client for Offpkg.
 
@@ -1576,6 +1577,7 @@ class _FooterItem extends StatelessWidget {
                 path: "lib/shared/widgets/app_top_navbar/app_top_navbar.dart".into(),
                 content: r##"import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../../../core/extension/context_extension.dart';
 import 'toggle_theme_button.dart';
 
@@ -1602,15 +1604,15 @@ class AppTopNavbar extends ConsumerWidget implements PreferredSizeWidget {
             children: [
               // Logo/Brand Section
               Container(
-                padding: const EdgeInsets.all(8),
+                padding: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
-                  color: context.cs.primary.withOpacity(0.1),
+                  color: context.cs.primary.withOpacity(0.05),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(
-                  Icons.auto_awesome_rounded,
-                  color: context.cs.primary,
-                  size: 20,
+                child: SvgPicture.network(
+                  'https://raw.githubusercontent.com/aswin402/offpkg/main/doc/logo.svg',
+                  width: 24,
+                  height: 24,
                 ),
               ),
               const SizedBox(width: 12),

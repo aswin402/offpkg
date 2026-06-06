@@ -224,7 +224,7 @@ pub fn react_vite() -> Stack {
         files: vec![
             StackFile {
                 path: "README.md".into(),
-                content: r###"# Offpkg Vite+React Template 🚀
+                content: r###"# <img src="https://raw.githubusercontent.com/aswin402/offpkg/main/doc/logo.svg" alt="offpkg Logo" width="36" height="36" align="center"/> Offpkg Vite+React Template 🚀
 
 A premium, highly-opinionated Vite + React starter template designed for scalability, type-safety, and modern developer experience.
 
@@ -1123,8 +1123,9 @@ export function Navbar() {
   return (
     <nav className="fixed top-0 left-0 right-0 h-16 border-b border-border/40 bg-background/80 backdrop-blur-md z-50 flex items-center justify-between px-6">
       <div className="flex items-center gap-8">
-        <Link to="/" className="text-xl font-heading font-bold tracking-tight text-primary transition-opacity hover:opacity-80">
-          OFFPKG
+        <Link to="/" className="text-xl font-heading font-bold tracking-tight text-primary transition-opacity hover:opacity-80 flex items-center gap-2">
+          <img src="https://raw.githubusercontent.com/aswin402/offpkg/main/doc/logo.svg" alt="Offpkg Logo" className="w-6 h-6" />
+          <span>OFFPKG</span>
         </Link>
         <div className="hidden md:flex items-center gap-6">
           <Link to="/" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2">
@@ -1693,7 +1694,7 @@ pub fn react_vite_full() -> Stack {
         files: vec![
             StackFile {
                 path: "README.md".into(),
-                content: r###"# Offpkg Vite+React Template 🚀
+                content: r###"# <img src="https://raw.githubusercontent.com/aswin402/offpkg/main/doc/logo.svg" alt="offpkg Logo" width="36" height="36" align="center"/> Offpkg Vite+React Template 🚀
 
 A premium, highly-opinionated Vite + React starter template designed for scalability, type-safety, and modern developer experience.
 
@@ -2592,8 +2593,9 @@ export function Navbar() {
   return (
     <nav className="fixed top-0 left-0 right-0 h-16 border-b border-border/40 bg-background/80 backdrop-blur-md z-50 flex items-center justify-between px-6">
       <div className="flex items-center gap-8">
-        <Link to="/" className="text-xl font-heading font-bold tracking-tight text-primary transition-opacity hover:opacity-80">
-          OFFPKG
+        <Link to="/" className="text-xl font-heading font-bold tracking-tight text-primary transition-opacity hover:opacity-80 flex items-center gap-2">
+          <img src="https://raw.githubusercontent.com/aswin402/offpkg/main/doc/logo.svg" alt="Offpkg Logo" className="w-6 h-6" />
+          <span>OFFPKG</span>
         </Link>
         <div className="hidden md:flex items-center gap-6">
           <Link to="/" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2">
@@ -3133,7 +3135,7 @@ pub fn react_vite_gsap() -> Stack {
         files: vec![
             StackFile {
                 path: "README.md".into(),
-                content: r####"# Offpkg Vite+React Kinetic Template 🚀
+                content: r####"# <img src="https://raw.githubusercontent.com/aswin402/offpkg/main/doc/logo.svg" alt="offpkg Logo" width="36" height="36" align="center"/> Offpkg Vite+React Kinetic Template 🚀
 
 A premium, highly-opinionated Vite + React starter template designed for creative visual web development with seamless smooth scrolling, physics-based UI motion, accessible components, and animated vector icons.
 
@@ -9500,7 +9502,7 @@ export function Navbar() {
     <nav className="fixed top-0 left-0 right-0 h-16 border-b border-border/40 bg-background/80 backdrop-blur-md z-50 flex items-center justify-between px-6">
       <div className="flex items-center gap-8">
         <Link to="/" className="text-xl font-heading font-bold tracking-tight text-primary transition-opacity hover:opacity-80 flex items-center gap-2">
-          <LordIcon src="https://cdn.lordicon.com/nocovwne.json" size={28} colors="primary:var(--color-primary),secondary:currentColor" />
+          <img src="https://raw.githubusercontent.com/aswin402/offpkg/main/doc/logo.svg" alt="Offpkg Logo" className="w-7 h-7" />
           <span>OFFPKG</span>
         </Link>
         <div className="hidden md:flex items-center gap-6">
