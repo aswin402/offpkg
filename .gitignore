@@ -33,7 +33,7 @@ node_modules/
 dist/
 uv.lock
 
-# ── Video build output ──────────────────────────────────────────────
-video/out/
+# ── Video generation workspace (local only) ─────────────────────────
+video/
 *.mp4
 !assets/*.mp4

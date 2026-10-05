@@ -32,7 +32,7 @@ pub fn flutter_riverpod(app_name: Option<&str>) -> Stack {
         files: vec![
             StackFile {
                 path: "OFFPKG_README.md".into(),
-                content: r##"# <img src="https://raw.githubusercontent.com/aswin402/offpkg/main/doc/logo.svg" alt="offpkg Logo" width="36" height="36" align="center"/> Offpkg Flutter App
+                content: r##"# <img src="https://raw.githubusercontent.com/aswin402/offpkg/main/docs/logo.svg" alt="offpkg Logo" width="36" height="36" align="center"/> Offpkg Flutter App
 
 A modern, scalable Flutter application serving as the client for Offpkg.
 
@@ -1611,7 +1611,7 @@ class AppTopNavbar extends ConsumerWidget implements PreferredSizeWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: SvgPicture.network(
-                  'https://raw.githubusercontent.com/aswin402/offpkg/main/doc/logo.svg',
+                  'https://raw.githubusercontent.com/aswin402/offpkg/main/docs/logo.svg',
                   width: 24,
                   height: 24,
                 ),
