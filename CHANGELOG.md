@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Cache storage tests verifying path resolution, scoped package name flattening (`@scope/pkg` -> `__scope__pkg`), and SHA-256 verification.
   - Manifest parser tests for Dart (`pubspec.yaml`), Python (`pyproject.toml`), and Node.js (`package.json`).
 - **Discrete Template Assets**: Extracted large inlined binary and vector assets into static files under `src/stacks/builtin/assets/` (`favicon.svg`, `icons.svg`, `vite.svg`, `react.svg`, `next_favicon.ico`, `hero.png`), embedding them via `include_bytes!`.
+- **Interactive Visual Showcase**: Created high-fidelity animated TUI demo GIF demonstrating real diagnostics (`offpkg doctor`), stack discovery (`offpkg stack list`), offline documentation (`offpkg docs show`), and cached package querying (`offpkg list`), alongside a 30-second Full HD explanatory video built with Remotion.
 
 ### Fixed
 - **Cargo Workspace Conflict**: Added standalone `[workspace]` configuration to `Cargo.toml` and excluded `offpkg` from the parent workspace, allowing `cargo check`, `cargo test`, and `cargo build` to run cleanly without parent boundary errors.

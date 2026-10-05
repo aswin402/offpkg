@@ -32,3 +32,8 @@ node_modules/
 *.egg-info/
 dist/
 uv.lock
+
+# ── Video build output ──────────────────────────────────────────────
+video/out/
+*.mp4
+!assets/*.mp4
