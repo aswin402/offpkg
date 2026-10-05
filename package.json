@@ -1,0 +1,26 @@
+{
+  "name": "offpkg",
+  "version": "0.1.7",
+  "description": "Universal offline package manager for Bun (npm), Python uv (PyPI), and Flutter (pub.dev)",
+  "bin": {
+    "offpkg": "./bin/offpkg.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aswin402/offpkg.git"
+  },
+  "author": "Aswin",
+  "license": "MIT",
+  "keywords": [
+    "offpkg",
+    "offline",
+    "package-manager",
+    "bun",
+    "uv",
+    "flutter",
+    "cache"
+  ],
+  "files": [
+    "bin/"
+  ]
+}

@@ -67,7 +67,7 @@ offpkg v0.1.7 · universal offline package manager
 
 ## Quickstart 🚀
 
-### Option 1: One-Line Install (Recommended)
+### 1. Linux & macOS (Automated One-Liner)
 
 Run the automated installer script via `curl` or `wget`. It auto-detects your operating system and architecture, downloads the pre-built binary (or compiles from source if pre-built is unavailable), installs it to `~/.offpkg/bin`, and configures your shell `$PATH`:
 
@@ -86,7 +86,55 @@ source ~/.bashrc   # or ~/.zshrc / source ~/.config/fish/config.fish
 
 ---
 
-### Option 2: Direct Binary Download (GitHub Releases)
+### 2. Windows (PowerShell One-Liner)
+
+Open **PowerShell** (or Windows Terminal) and run:
+
+```powershell
+irm https://raw.githubusercontent.com/aswin402/offpkg/main/install.ps1 | iex
+```
+
+*This automatically downloads `offpkg.exe`, saves it to `%USERPROFILE%\.offpkg\bin`, and appends it to your User `PATH`.*
+
+---
+
+### 3. Install with Bun or npm 🍞
+
+If you already use **Bun** or **Node.js**, you can install `offpkg` globally or run it on-demand:
+
+```bash
+# Install globally via Bun
+bun add -g github:aswin402/offpkg
+
+# Or run instantly without installing via bunx
+bunx github:aswin402/offpkg doctor
+bunx github:aswin402/offpkg stack list
+
+# Or install globally via npm
+npm install -g github:aswin402/offpkg
+
+# Or run instantly with npx
+npx github:aswin402/offpkg doctor
+```
+
+---
+
+### 4. Install with Python / uv 🐍
+
+If you already use **uv** or Python, install `offpkg` as an isolated global tool or run it ephemerally:
+
+```bash
+# Install globally as a CLI tool via uv
+uv tool install git+https://github.com/aswin402/offpkg.git
+
+# Or run ephemerally with uvx
+uvx --from git+https://github.com/aswin402/offpkg.git offpkg doctor
+uvx --from git+https://github.com/aswin402/offpkg.git offpkg stack list
+```
+
+---
+
+### 5. Direct Binary Download (GitHub Releases)
 
 Download pre-compiled, self-contained static binaries directly from [GitHub Releases](https://github.com/aswin402/offpkg/releases/latest):
 
@@ -108,14 +156,13 @@ chmod +x offpkg
 
 # 3. Move to your PATH
 sudo mv offpkg /usr/local/bin/
-# (or: mkdir -p ~/.offpkg/bin && mv offpkg ~/.offpkg/bin/ && export PATH="$HOME/.offpkg/bin:$PATH")
 ```
 
 ---
 
-### Option 3: Install via Cargo (Rust)
+### 6. Install via Cargo (Rust)
 
-If you have Rust installed, install directly from the GitHub repository:
+If you have the Rust toolchain installed:
 
 ```bash
 cargo install --git https://github.com/aswin402/offpkg.git

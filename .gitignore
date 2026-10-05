@@ -25,3 +25,10 @@ offpkg-windows-*
 Cargo.lock
 
 justfile
+
+# ── Environment & package dependencies ────────────────────────────
+.venv/
+node_modules/
+*.egg-info/
+dist/
+uv.lock
