@@ -67,9 +67,9 @@ offpkg v0.1.7 · universal offline package manager
 
 ## Quickstart 🚀
 
-### One-Line Install (Single Binary)
+### Option 1: One-Line Install (Recommended)
 
-Download and install the standalone `offpkg` binary in seconds:
+Run the automated installer script via `curl` or `wget`. It auto-detects your operating system and architecture, downloads the pre-built binary (or compiles from source if pre-built is unavailable), installs it to `~/.offpkg/bin`, and configures your shell `$PATH`:
 
 ```bash
 # Using curl (Linux & macOS)
@@ -77,26 +77,84 @@ curl -fsSL https://raw.githubusercontent.com/aswin402/offpkg/main/install.sh | b
 
 # Or using wget
 wget -qO- https://raw.githubusercontent.com/aswin402/offpkg/main/install.sh | bash
+```
 
-# Or via Cargo (from git)
+After installation, reload your shell:
+```bash
+source ~/.bashrc   # or ~/.zshrc / source ~/.config/fish/config.fish
+```
+
+---
+
+### Option 2: Direct Binary Download (GitHub Releases)
+
+Download pre-compiled, self-contained static binaries directly from [GitHub Releases](https://github.com/aswin402/offpkg/releases/latest):
+
+| Platform | Architecture | Binary Asset |
+|---|---|---|
+| **Linux** | `x86_64` (Intel/AMD) | [`offpkg-linux-x86_64`](https://github.com/aswin402/offpkg/releases/latest/download/offpkg-linux-x86_64) |
+| **Linux** | `aarch64` (ARM64) | [`offpkg-linux-aarch64`](https://github.com/aswin402/offpkg/releases/latest/download/offpkg-linux-aarch64) |
+| **macOS** | `Apple Silicon` (M1/M2/M3/M4) | [`offpkg-macos-aarch64`](https://github.com/aswin402/offpkg/releases/latest/download/offpkg-macos-aarch64) |
+| **macOS** | `x86_64` (Intel) | [`offpkg-macos-x86_64`](https://github.com/aswin402/offpkg/releases/latest/download/offpkg-macos-x86_64) |
+| **Windows** | `x86_64` | [`offpkg-windows-x86_64.exe`](https://github.com/aswin402/offpkg/releases/latest/download/offpkg-windows-x86_64.exe) |
+
+#### Quick Manual Setup (Linux / macOS):
+```bash
+# 1. Download the binary for your platform
+curl -sL -o offpkg https://github.com/aswin402/offpkg/releases/latest/download/offpkg-linux-x86_64
+
+# 2. Make it executable
+chmod +x offpkg
+
+# 3. Move to your PATH
+sudo mv offpkg /usr/local/bin/
+# (or: mkdir -p ~/.offpkg/bin && mv offpkg ~/.offpkg/bin/ && export PATH="$HOME/.offpkg/bin:$PATH")
+```
+
+---
+
+### Option 3: Install via Cargo (Rust)
+
+If you have Rust installed, install directly from the GitHub repository:
+
+```bash
 cargo install --git https://github.com/aswin402/offpkg.git
 ```
 
-### Self-Updating
+---
 
-Keep `offpkg` current with a single command:
+### Self-Updating 🔄
+
+Keep `offpkg` up to date with the latest templates and improvements using a single command:
 
 ```bash
 # Check GitHub releases and update binary automatically
 offpkg update self
-# Or via alias
+
+# Or using the self-update alias
 offpkg self-update
 ```
 
-### Verification & Health Check
+If your installation is already on the latest version, `offpkg` immediately confirms:
+```
+[ info    ]  checking for offpkg updates...
+[ done    ]  offpkg is already up to date (v0.1.7)
+```
+
+---
+
+### Verification & Health Check 🩺
+
+Verify the installation and check runtime environment compatibility:
 
 ```bash
+# Check version banner
+offpkg --version
+
+# Run diagnostic suite for bun, uv, flutter, SQLite & cache
 offpkg doctor
+
+# List all available built-in project stacks
 offpkg stack list
 ```
 
