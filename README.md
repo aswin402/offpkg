@@ -1,85 +1,82 @@
-# offpkg 🛠️ Universal Offline Package Manager
-
 <p align="center">
-  <img src="doc/logo.svg" alt="offpkg Logo" width="220px"/>
+  <a href="https://github.com/aswin402/offpkg">
+    <img src="doc/logo.svg" alt="offpkg - Universal Offline Package Manager" width="100%" />
+  </a>
 </p>
 
-<p align="center">
-  <a href="https://www.rust-lang.org/"><img src="https://img.shields.io/badge/Rust-1.80%2B-blue?logo=rust" alt="Rust"/></a>
-  <img src="https://img.shields.io/badge/version-0.1.7-green" alt="Version"/>
-  <img src="https://img.shields.io/badge/license-MIT-blue" alt="License"/>
-</p>
+<div align="center">
 
-**offpkg** is a high-performance, offline-first package manager for **Bun (Node.js)**, **Python uv**, and **Flutter**. Cache packages once, instantiate them globally instantly—no network overhead, no configuration pollution.
+**High-performance, offline-first package manager & fullstack template engine.**  
+Cache packages once from **npm (Bun)**, **PyPI (uv)**, and **pub.dev (Flutter)**. Instantiate instantly offline forever.
 
-> Vibe coded with ❤️ by Aswin
+<br/>
+
+[![Version](https://img.shields.io/badge/version-0.1.7-00f2fe?style=flat-square&logo=git&logoColor=white)](https://github.com/aswin402/offpkg/releases)
+[![Rust](https://img.shields.io/badge/Rust-1.80%2B-e05d44?style=flat-square&logo=rust&logoColor=white)](https://www.rust-lang.org/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-10b981?style=flat-square)](LICENSE)
+[![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20macOS%20%7C%20Windows-64748b?style=flat-square)](https://github.com/aswin402/offpkg/releases)
+[![GitHub Release](https://img.shields.io/badge/prebuilt%20binaries-v0.1.7-3b82f6?style=flat-square&logo=github&logoColor=white)](https://github.com/aswin402/offpkg/releases/latest)
+
+</div>
 
 ---
 
-## Lightweight & High-Performance ⚡
+## At a Glance ⚡
 
-`offpkg` is engineered in pure Rust for minimal overhead, extreme speed, and a tiny system footprint.
+| Dimension | Details |
+| :--- | :--- |
+| **Problem** | Developers face broken installs, stalled CI, or failed scaffolds when working on trains, flights, remote sites, or air-gapped environments. Standard package managers force redundant network round-trips. |
+| **Solution** | `offpkg` fetches packages once, verifies cryptographic hashes, catalogs them in a high-speed SQLite database, and instantiates them globally offline in milliseconds. |
+| **Under the Hood** | Written in **100% pure Rust** with **Tokio** (async runtime), **SQLite** (bundled engine), **reqwest** (`rustls-tls` zero-OpenSSL dependency), and **SHA-256** checksum verification. |
+| **Supported Ecosystems** | **Bun** (npm / Node.js) · **uv** (PyPI / Python) · **Flutter** (pub.dev / Dart). |
+| **Binary Profile** | Self-contained, stripped static binary (**~8.2 MB**). No external runtime, interpreter, or dynamic libraries needed. |
 
-| Resource / Metric | Benchmark Value | Details |
+---
+
+## Performance & Resource Footprint 📊
+
+`offpkg` is engineered with resource discipline for ultra-fast startup and minimal system overhead:
+
+| Resource / Metric | Benchmark Value | Engineering Details |
 | :--- | :--- | :--- |
-| **ROM Footprint (Binary)** | **~8.3 MB** | Single fully-compiled, stripped static binary. No interpreter or runtime required to run. |
-| **Native RAM Usage** | **~7.3 MB** | Peak resident memory during SQL registry queries & configuration parsing. |
-| **CLI Dispatch Latency** | **< 15 ms** | Sub-millisecond command parsing using `clap` and quick SQLite catalog lookups. |
-| **Offline Link Speed** | **Instant (Milliseconds)** | Local file hardlinking and `.tgz` unpacking directly to project roots. |
-
----
-
-## Core Features ✨
-
-- **📦 Multi-Runtime Cache Wrapper**: Unified interface for Bun (npm), Python (uv/PyPI), and Flutter (pub.dev).
-- **🔒 Secure Local Archiving**: Downloads and verifies tarballs and wheels via SHA-256 hashes, stored in `~/.offpkg/cache/`.
-- **🗃️ SQLite Database Manifest**: Blazing-fast cataloging in `offpkg.db` with auto-repair and integrity diagnostics.
-- **🏗️ Pristine Stacks**: Scaffold entire application templates offline in under a second (configurations, files, and deep transitive dependencies).
-- **📝 Global Offline Docs**: Modify fetched package READMEs once with `offpkg docs edit`, and have your custom versions auto-copied to every new project folder under `offpkg_docs/`.
-- **🩺 Interactive TUI & Doctor**: Features animated spinners, colored status labels, progress bars, and environment diagnostics to verify runtime compatibility.
-- **🔄 Auto-Updating Engine**: Update packages or offpkg itself seamlessly via `offpkg update self` or `offpkg self-update`.
-- **🧹 Cache Pruner**: `remove <pkg>` deletes cached archives and DB entries while displaying freed disk space.
+| **ROM Footprint (Binary)** | **~8.2 MB** | Single compiled, stripped release binary. Zero external runtime dependencies. |
+| **Resident Memory (RAM)** | **~7.3 MB** | Peak memory during SQLite catalog queries and deep configuration parsing. |
+| **CLI Dispatch Latency** | **< 15 ms** | Sub-millisecond argument parsing via `clap` and instant local cache discovery. |
+| **Offline Linking Speed** | **Instant (ms)** | Zero network calls; fast local archive extraction directly into project targets. |
 
 ---
 
 ## How It Works 🔄
 
 ```
-Online once:                          Offline forever:
-─────────────────────────────         ──────────────────────────────────
-offpkg bun install react         →    offpkg bun add react      (project A)
-offpkg stack install react-vite  →    offpkg stack add react-vite (project B)
-offpkg docs edit react           →    offpkg_docs/offpkg_react.md (every project)
+ONLINE (Run Once):                                  OFFLINE (Forever):
+─────────────────────────────────────────────       ──────────────────────────────────────────────
+$ offpkg bun install react                   →      $ offpkg bun add react          (Project A)
+$ offpkg uv install fastapi                  →      $ offpkg uv add fastapi         (Project B)
+$ offpkg flutter install dio                 →      $ offpkg flutter add dio        (Project C)
+$ offpkg stack install react-vite            →      $ offpkg stack add react-vite   (Zero network)
+$ offpkg docs edit react                     →      $ (Auto-copied to offpkg_docs/ in every repo)
 ```
 
 ---
 
-## CLI Logo
+## Quickstart & Installation 🚀
 
-```
-╔═╗╔═╗╔═╗╔═╗╦╔═╔═╗
-║ ║╠╣ ╠╣ ╠═╝╠╩╗║ ╦
-╚═╝╚  ╚  ╩  ╩ ╩╚═╝
-offpkg v0.1.7 · universal offline package manager
-```
-
----
-
-## Quickstart 🚀
+Choose the installation method suited for your environment:
 
 ### 1. Linux & macOS (Automated One-Liner)
 
-Run the automated installer script via `curl` or `wget`. It auto-detects your operating system and architecture, downloads the pre-built binary (or compiles from source if pre-built is unavailable), installs it to `~/.offpkg/bin`, and configures your shell `$PATH`:
+Detects OS, downloads the pre-built binary, installs to `~/.offpkg/bin`, and updates your shell `$PATH`:
 
 ```bash
-# Using curl (Linux & macOS)
+# Using curl
 curl -fsSL https://raw.githubusercontent.com/aswin402/offpkg/main/install.sh | bash
 
 # Or using wget
 wget -qO- https://raw.githubusercontent.com/aswin402/offpkg/main/install.sh | bash
 ```
 
-After installation, reload your shell:
+Reload your terminal session:
 ```bash
 source ~/.bashrc   # or ~/.zshrc / source ~/.config/fish/config.fish
 ```
@@ -88,22 +85,22 @@ source ~/.bashrc   # or ~/.zshrc / source ~/.config/fish/config.fish
 
 ### 2. Windows (PowerShell One-Liner)
 
-Open **PowerShell** (or Windows Terminal) and run:
+Open **PowerShell** or Windows Terminal and run:
 
 ```powershell
 irm https://raw.githubusercontent.com/aswin402/offpkg/main/install.ps1 | iex
 ```
 
-*This automatically downloads `offpkg.exe`, saves it to `%USERPROFILE%\.offpkg\bin`, and appends it to your User `PATH`.*
+*Downloads `offpkg.exe`, saves to `%USERPROFILE%\.offpkg\bin`, and registers the directory in your User `PATH` environment variable permanently.*
 
 ---
 
 ### 3. Install with Bun or npm 🍞
 
-If you already use **Bun** or **Node.js**, you can install `offpkg` globally or run it on-demand:
+If you already use **Bun** or **Node.js**, install globally or invoke on-demand:
 
 ```bash
-# Install globally via Bun
+# Install globally with Bun
 bun add -g github:aswin402/offpkg
 
 # Or run instantly without installing via bunx
@@ -113,7 +110,7 @@ bunx github:aswin402/offpkg stack list
 # Or install globally via npm
 npm install -g github:aswin402/offpkg
 
-# Or run instantly with npx
+# Or run ephemerally with npx
 npx github:aswin402/offpkg doctor
 ```
 
@@ -121,10 +118,10 @@ npx github:aswin402/offpkg doctor
 
 ### 4. Install with Python / uv 🐍
 
-If you already use **uv** or Python, install `offpkg` as an isolated global tool or run it ephemerally:
+If you already use **uv** or Python, install `offpkg` into an isolated tool environment:
 
 ```bash
-# Install globally as a CLI tool via uv
+# Install globally via uv tool
 uv tool install git+https://github.com/aswin402/offpkg.git
 
 # Or run ephemerally with uvx
@@ -134,27 +131,22 @@ uvx --from git+https://github.com/aswin402/offpkg.git offpkg stack list
 
 ---
 
-### 5. Direct Binary Download (GitHub Releases)
+### 5. Pre-Built Static Binaries (GitHub Releases)
 
-Download pre-compiled, self-contained static binaries directly from [GitHub Releases](https://github.com/aswin402/offpkg/releases/latest):
+Download standalone binaries directly from [GitHub Releases](https://github.com/aswin402/offpkg/releases/latest):
 
-| Platform | Architecture | Binary Asset |
+| Platform | Architecture | Binary Download |
 |---|---|---|
-| **Linux** | `x86_64` (Intel/AMD) | [`offpkg-linux-x86_64`](https://github.com/aswin402/offpkg/releases/latest/download/offpkg-linux-x86_64) |
+| **Linux** | `x86_64` (Intel / AMD) | [`offpkg-linux-x86_64`](https://github.com/aswin402/offpkg/releases/latest/download/offpkg-linux-x86_64) |
 | **Linux** | `aarch64` (ARM64) | [`offpkg-linux-aarch64`](https://github.com/aswin402/offpkg/releases/latest/download/offpkg-linux-aarch64) |
 | **macOS** | `Apple Silicon` (M1/M2/M3/M4) | [`offpkg-macos-aarch64`](https://github.com/aswin402/offpkg/releases/latest/download/offpkg-macos-aarch64) |
 | **macOS** | `x86_64` (Intel) | [`offpkg-macos-x86_64`](https://github.com/aswin402/offpkg/releases/latest/download/offpkg-macos-x86_64) |
 | **Windows** | `x86_64` | [`offpkg-windows-x86_64.exe`](https://github.com/aswin402/offpkg/releases/latest/download/offpkg-windows-x86_64.exe) |
 
-#### Quick Manual Setup (Linux / macOS):
 ```bash
-# 1. Download the binary for your platform
+# Quick manual setup (Linux / macOS)
 curl -sL -o offpkg https://github.com/aswin402/offpkg/releases/latest/download/offpkg-linux-x86_64
-
-# 2. Make it executable
 chmod +x offpkg
-
-# 3. Move to your PATH
 sudo mv offpkg /usr/local/bin/
 ```
 
@@ -162,7 +154,7 @@ sudo mv offpkg /usr/local/bin/
 
 ### 6. Install via Cargo (Rust)
 
-If you have the Rust toolchain installed:
+If you have Rust 1.80+ installed:
 
 ```bash
 cargo install --git https://github.com/aswin402/offpkg.git
@@ -170,19 +162,19 @@ cargo install --git https://github.com/aswin402/offpkg.git
 
 ---
 
-### Self-Updating 🔄
+## Automated Self-Updating 🔄
 
-Keep `offpkg` up to date with the latest templates and improvements using a single command:
+Keep `offpkg` updated with the latest templates and improvements using a single command:
 
 ```bash
-# Check GitHub releases and update binary automatically
+# Checks GitHub releases and updates binary in-place
 offpkg update self
 
-# Or using the self-update alias
+# Or via alias
 offpkg self-update
 ```
 
-If your installation is already on the latest version, `offpkg` immediately confirms:
+If your installation is already current:
 ```
 [ info    ]  checking for offpkg updates...
 [ done    ]  offpkg is already up to date (v0.1.7)
@@ -190,369 +182,163 @@ If your installation is already on the latest version, `offpkg` immediately conf
 
 ---
 
-### Verification & Health Check 🩺
+## Core Features ✨
 
-Verify the installation and check runtime environment compatibility:
-
-```bash
-# Check version banner
-offpkg --version
-
-# Run diagnostic suite for bun, uv, flutter, SQLite & cache
-offpkg doctor
-
-# List all available built-in project stacks
-offpkg stack list
-```
+- **📦 Multi-Runtime Support**: Unifies package caching for Bun (`npm`), Python (`uv`/`PyPI`), and Flutter (`pub.dev`).
+- **🔒 Cryptographic Integrity**: Verifies SHA-256 hashes on all cached `.tgz`, `.whl`, and `.tar.gz` archives in `~/.offpkg/cache/`.
+- **🗃️ SQLite Database Manifest**: Embedded `offpkg.db` catalog with automated schema migrations, unique constraints, and instant queries.
+- **🏗️ Fullstack Stacks Engine**: Scaffolds full multi-file architectures in under a second (configs, source files, and dependencies) completely offline.
+- **📝 Global Offline Documentation**: Edit package READMEs once with `offpkg docs edit`, and have your custom notes automatically synchronized to `offpkg_docs/` in every new project folder.
+- **🩺 Interactive Terminal UI & Doctor**: ANSI progress bars, animated braille spinners, and `offpkg doctor` to verify environment toolchains.
+- **🧹 Disk Reclamation**: `remove <pkg>` clears cached archives and database records while reporting freed disk space.
 
 ---
 
-## CLI Reference
+## CLI Reference 🛠️
 
-### Per-runtime commands
+### Per-Runtime Package Commands
 
 ```bash
-# Download and cache a package globally (needs internet, run once)
+# Cache a package globally (Online once)
 offpkg bun install <pkg>
 offpkg uv install <pkg>
 offpkg flutter install <pkg>
 
-# Add a cached package to the current project (fully offline)
+# Add cached package to current project (Offline forever)
 offpkg bun add <pkg>
 offpkg uv add <pkg>
 offpkg flutter add <pkg>
 
-# Cache all deps from existing project file (needs internet)
-offpkg uv install-all        # reads pyproject.toml
-offpkg flutter install-all   # reads pubspec.yaml
+# Bulk-cache all dependencies declared in project files
+offpkg uv install-all        # parses pyproject.toml
+offpkg flutter install-all   # parses pubspec.yaml
 
-# Remove a package from the offpkg cache
+# Remove a package from global cache
 offpkg bun remove <pkg>
 offpkg uv remove <pkg>
 offpkg flutter remove <pkg>
 ```
 
-### Stack commands
+### Fullstack Stack Commands
 
 ```bash
-# Cache all packages in a stack globally (needs internet, run once)
+# Cache all packages in a template globally
 offpkg stack install react-vite
 
-# Add a full stack to the current project (fully offline)
+# Scaffold full stack into current directory (Fully offline)
 offpkg stack add react-vite
 
-# List all available stacks
+# List all available built-in stacks
 offpkg stack list
 
-# Show what a stack contains
+# Inspect what a stack contains (files, packages, configs)
 offpkg stack show react-vite
 
-# Create a custom stack template
+# Create a custom TOML stack template interactively
 offpkg stack new my-stack --runtime bun
 ```
 
-### Docs commands
+### Global Documentation Engine
 
 ```bash
-# Edit global doc in $EDITOR — your edits apply to all future project copies
+# Open global package guide in $EDITOR (applies to all future projects)
 offpkg docs edit <pkg> --runtime bun
 
-# Print global doc to terminal
+# Print global package guide to terminal
 offpkg docs show <pkg> --runtime bun
 
-# Regenerate from original registry README
+# Reset guide back to original registry README
 offpkg docs reset <pkg> --runtime bun
 
-# List all packages with cached docs
+# List all cached documentation files
 offpkg docs list
 offpkg docs list --runtime flutter
 ```
 
-### Global commands
+### Diagnostics & Management
 
 ```bash
-offpkg list                        # show all cached packages
-offpkg list --runtime bun          # filter by runtime
-offpkg doctor                      # environment health check
+offpkg list                        # list all cached packages
+offpkg list --runtime uv           # filter cached packages by runtime
+offpkg doctor                      # verify runtimes, cache paths, and SQLite DB
 offpkg update self                 # check for new version and update offpkg binary
-offpkg self-update                 # alias for binary update
 ```
 
 ---
 
-## Built-in Stacks
+## Built-in Stacks Catalog 🏛️
 
-| Stack | Runtime | Description / Packages |
-|---|---|---|
-| **`react-vite`** | bun | React 19 + Vite 8 + Tailwind 4 + Zustand + TanStack Query + React Router 7 |
-| **`react-vite-full`** | bun | Complete Modern Template (above + zod, axios, hook-form, etc.) |
-| **`react-vite-gsap`** | bun | GSAP + Framer Motion + Lenis Smooth Scroll + shadcn/ui + Lordicon (Kinetic Motion Template) |
-| **`hono-api`** | bun | Hono API + Pino logger |
-| **`hono-full`** | bun | Hono + Prisma + Zod + Pino + Better Auth (Prisma Adapter) |
-| **`next-template`** | bun | Upgraded Next.js 16 + Tailwind v4 + Prisma 7 + Professional Backend |
-| **`mern`** | bun | MERN Stack - Express + React + MongoDB + TypeScript (Monorepo) |
-| **`pern`** | bun | PERN Stack - Express + React + PostgreSQL + Prisma + TypeScript (Monorepo) |
-| **`fastapi`** | uv | FastAPI + SQLAlchemy (Async) + Alembic + Pydantic v2 + structlog |
-| **`flutter-riverpod`** | flutter | Flutter + Riverpod/Hooks + GoRouter + Dio + Material 3 + Logger + Google Fonts |
+`offpkg` includes 10 production-grade, pre-configured application templates ready for instant offline generation:
 
-Each stack also generates starter config files (`vite.config.ts`, `tsconfig.json`, `main.dart`, etc.) automatically.
-Furthermore, the React/Next stacks natively embed global **binary assets** (e.g. `hero.png`) and fully resolve **all deep dependencies** directly into `node_modules` without altering your project configuration.
+| Stack Name | Runtime | Architecture / Stack Details |
+| :--- | :---: | :--- |
+| **`react-vite`** | `bun` | React 19 + Vite 8 + Tailwind CSS v4 + Zustand + TanStack Query + React Router 7 |
+| **`react-vite-full`** | `bun` | Complete modern frontend stack (above + Zod, Axios, React Hook Form, Lucide) |
+| **`react-vite-gsap`** | `bun` | Kinetic Motion Template (GSAP + Framer Motion + Lenis Scroll + shadcn/ui + Lordicon) |
+| **`hono-api`** | `bun` | High-performance Hono REST API + Bun runtime + Pino structured logger |
+| **`hono-full`** | `bun` | Fullstack backend: Hono + Prisma ORM + Zod validation + Pino + Better Auth |
+| **`next-template`** | `bun` | Next.js 16 + Tailwind CSS v4 + Prisma 7 + Professional modular backend |
+| **`mern`** | `bun` | Monorepo architecture: Express API + React frontend + MongoDB + TypeScript |
+| **`pern`** | `bun` | Monorepo architecture: Express API + React frontend + PostgreSQL + Prisma ORM |
+| **`fastapi`** | `uv` | Async FastAPI + SQLAlchemy (Async) + Alembic migrations + Pydantic v2 + structlog |
+| **`flutter-riverpod`** | `flutter` | Flutter + Riverpod 2.0 / Hooks + GoRouter + Dio + Material 3 Design Tokens + Logger |
 
----
-
-## Workflows
-
-### 1. First time setup
-
-```bash
-offpkg doctor       # check runtimes
-offpkg stack list   # see available stacks
-```
-
-### 2. React + Vite project (offline)
-
-```bash
-# Online once
-offpkg stack install react-vite-full
-
-# Offline forever
-mkdir my-app && cd my-app
-bun init -y
-offpkg stack add react-vite-full
-# → installs all packages into node_modules/
-# → writes vite.config.ts, tsconfig.json, index.html, src/main.tsx
-# → writes src/store.ts (zustand), wraps app in QueryClientProvider
-# → copies docs into offpkg_docs/
-```
-
-### 3. FastAPI project (offline)
-
-```bash
-# Online once
-offpkg stack install fastapi
-
-# Offline forever
-mkdir my-api && cd my-api
-uv init
-offpkg stack add fastapi
-# → runs uv add --frozen for all packages
-# → writes app/main.py, .env, alembic.ini
-```
-
-### 4. Flutter project (offline)
-
-```bash
-# Online once
-offpkg stack install flutter-riverpod
-
-# Offline forever
-cd my_flutter_app
-offpkg stack add flutter-riverpod
-# → extracts to ~/.pub-cache, runs flutter pub get --offline
-# → writes lib/main.dart with ProviderScope boilerplate
-```
-
-### 5. Global docs workflow
-
-```bash
-# install caches the package + fetches README
-offpkg bun install react
-
-# edit the global doc — add your own notes, examples, team conventions
-offpkg docs edit react --runtime bun
-# opens ~/.offpkg/docs/bun/react.md in $EDITOR
-
-# every project you add react to gets YOUR edited version
-cd project-a && offpkg bun add react
-# → node_modules/react/ installed
-# → offpkg_docs/offpkg_react.md copied (your edited version)
-
-cd project-b && offpkg bun add react
-# → same edited doc copied here too
-```
-
-### 6. Custom stack
-
-```bash
-# Create template
-offpkg stack new my-fullstack --runtime bun
-# → creates ~/.offpkg/stacks/my-fullstack.toml
-
-# Edit the TOML to add your packages and starter files
-nano ~/.offpkg/stacks/my-fullstack.toml
-
-# Cache it (needs internet once)
-offpkg stack install my-fullstack
-
-# Use it in any project (offline)
-offpkg stack add my-fullstack
-```
+*Each stack automatically generates all necessary starter configuration files (`vite.config.ts`, `tsconfig.json`, `pubspec.yaml`, `pyproject.toml`, etc.) and embeds required static assets.*
 
 ---
 
-## Directory Structure
+## System Architecture 📂
+
+`offpkg` isolates all data within your user home directory:
 
 ```
 ~/.offpkg/
-├── config.toml              # global config
-├── stacks/                  # your custom stack definitions
-│   └── my-stack.toml
-└── cache/
-    ├── offpkg.db            # sqlite manifest
-    ├── bun/                 # npm tarballs (.tgz)
-    ├── uv/                  # python wheels (.whl)
-    ├── flutter/             # pub archives (.tar.gz)
-    └── docs/
-        ├── bun/             # editable package docs
-        │   └── react.md
-        ├── uv/
-        │   └── fastapi.md
-        └── flutter/
-            └── riverpod.md
+├── bin/
+│   └── offpkg               # Executable binary
+├── cache/
+│   ├── bun/                 # .tgz tarballs from npm registry
+│   ├── uv/                  # .whl / .tar.gz archives from PyPI
+│   └── flutter/             # .tar.gz archives from pub.dev
+├── db/
+│   └── offpkg.db            # Embedded SQLite catalog (packages, checksums, timestamps)
+├── docs/
+│   ├── bun/                 # Editable package Markdown documentation
+│   ├── uv/
+│   └── flutter/
+└── stacks/                  # Custom user-defined TOML stack templates
 ```
 
 ---
 
-## Configuration
+## Verification & Environment Check 🩺
 
-```toml
-# ~/.offpkg/config.toml
+After installation, run `offpkg doctor` to check your environment toolchains:
 
-[cache]
-path = "~/.offpkg/cache"
-max_size_gb = 50.0
-
-[network]
-timeout_secs = 30
-retries = 3
-
-[runtimes]
-bun = "auto"       # auto = detect from PATH
-uv = "auto"
-flutter = "auto"
-```
-
-**Override cache location:**
 ```bash
-OFFPKG_CACHE_DIR=/external/drive offpkg bun install react
+$ offpkg doctor
 ```
-
----
-
-## Doctor Output
 
 ```
 ╔═╗╔═╗╔═╗╔═╗╦╔═╔═╗
 ║ ║╠╣ ╠╣ ╠═╝╠╩╗║ ╦
 ╚═╝╚  ╚  ╩  ╩ ╩╚═╝
-  offpkg v0.1.3 · universal offline package manager
+  offpkg v0.1.7 · universal offline package manager
 
-[ info  ]  offpkg doctor        running environment checks
-[ done  ]  bun                  bun 1.3.4
-[ done  ]  uv                   uv 0.10.7
-[ done  ]  flutter              Flutter 3.22.0 · channel stable
-[ done  ]  cache directory      ~/.offpkg/cache — 3 entries
-[ done  ]  database             30 package(s) cached — integrity ok
-[ done  ]  doctor complete
+[ info    ]  offpkg doctor  running environment checks
+
+[ done    ]  bun  1.4.2
+[ done    ]  uv  uv 0.12.23 (x86_64-unknown-linux-gnu)
+[ done    ]  flutter  Flutter 3.47.6 • channel stable
+[ done    ]  cache directory  ~/.offpkg/cache — active
+[ done    ]  database  262 package(s) cached — integrity ok
+
+[ done    ]  doctor complete
 ```
 
 ---
 
-## Database Schema
+## License 📄
 
-```sql
-CREATE TABLE packages (
-    id          INTEGER PRIMARY KEY AUTOINCREMENT,
-    name        TEXT NOT NULL,
-    version     TEXT NOT NULL,
-    runtime     TEXT NOT NULL CHECK(runtime IN ('bun','uv','flutter')),
-    cache_path  TEXT NOT NULL,
-    checksum    TEXT NOT NULL,
-    size_bytes  INTEGER,
-    cached_at   DATETIME DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE(name, version, runtime)
-);
+Distributed under the **MIT License**. See [`LICENSE`](LICENSE) for details.
 
-CREATE TABLE config (
-    key   TEXT PRIMARY KEY,
-    value TEXT
-);
-```
-
----
-
-## Architecture
-
-```
-CLI (clap)
-    │
-    ▼
-main.rs ──── Config ──── Database (SQLite)
-    │              └──── Cache (~/.offpkg/cache/)
-    │
-    ├── BunAdapter     → npmjs.org
-    ├── UvAdapter      → pypi.org
-    ├── FlutterAdapter → pub.dev
-    ├── StackStore     → ~/.offpkg/stacks/
-    ├── DocsStore      → ~/.offpkg/docs/
-    ├── remove         → cache pruning
-    └── doctor         → health checks
-
-TUI (ANSI) — spinner · progress bar · labels · summary
-```
-
----
-
-## Modules
-
-| Module | Purpose |
-|---|---|
-| `main.rs` | CLI dispatch, wires all modules together |
-| `cli.rs` | All clap command/subcommand definitions |
-| `config.rs` | Load/save `~/.offpkg/config.toml` |
-| `db.rs` | SQLite — insert/query/delete packages |
-| `cache.rs` | File store — download, checksum, path resolution |
-| `tui.rs` | Terminal UI — spinner, progress bar, colored labels |
-| `doctor.rs` | Runtime health checks and cache diagnostics |
-| `remove.rs` | Cache pruning — delete files and DB records |
-| `docs.rs` | Global docs — fetch READMEs, edit, copy to projects |
-| `stacks.rs` | Stack definitions, install/add, file generation |
-| `adapters/bun.rs` | Bun/npm install and add logic |
-| `adapters/uv.rs` | Python uv install and add logic |
-| `adapters/flutter.rs` | Flutter pub install and add logic |
-
----
-
-## Roadmap
-
-- [x] Full CLI — bun/uv/flutter add/install/remove/install-all
-- [x] Registry resolution — npm, PyPI, pub.dev
-- [x] Animated TUI — spinner, progress bar, colored labels
-- [x] Global docs system — fetch, edit, copy to projects
-- [x] Stacks — full project setup with one command
-- [x] Cache prune with freed space reporting
-- [ ] `offpkg update <pkg>` — update cached version
-- [ ] Auto-prune by size/age
-- [ ] Binary releases (GitHub Actions)
-- [ ] Windows support
-- [ ] VSCode extension
-
----
-
-## Contributing
-
-```bash
-git clone <repo> && cd offpkg
-cargo check        # must be zero warnings
-cargo fmt
-cargo clippy
-cargo build --release
-```
-
-Adding a new runtime adapter: copy `src/adapters/bun.rs`, update the registry URL and file format, add the subcommand to `cli.rs`, wire it in `main.rs`, add a check in `doctor.rs`.
-
-PRs welcome — fork, branch `feat/xyz`, update docs.
-
----
-
-**License**: MIT
+> Vibe coded with ❤️ by [Aswin](https://github.com/aswin402)
