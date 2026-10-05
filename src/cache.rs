@@ -26,7 +26,7 @@ impl Cache {
             _ => "tgz",
         };
         // Flatten scoped package names: @scope/name -> __scope__name
-        let safe_name = name.replace('@', "__").replace('/', "__");
+        let safe_name = name.replace(['@', '/'], "__");
         self.config
             .cache_path()
             .join(runtime)
@@ -92,4 +92,68 @@ pub fn compute_sha256(path: &Path) -> Result<String> {
         hasher.update(&buffer[..n]);
     }
     Ok(format!("{:x}", hasher.finalize()))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::io::Write;
+
+    #[test]
+    fn test_cache_path_for_runtimes() {
+        let config = Config::default();
+        let cache = Cache::new(config.clone());
+        let expected_base = config.cache_path();
+
+        let bun_path = cache.path_for("bun", "react", "19.2.0");
+        assert_eq!(bun_path, expected_base.join("bun/react@19.2.0.tgz"));
+
+        let uv_path = cache.path_for("uv", "requests", "2.31.0");
+        assert_eq!(uv_path, expected_base.join("uv/requests@2.31.0.whl"));
+
+        let flutter_path = cache.path_for("flutter", "dio", "5.4.0");
+        assert_eq!(flutter_path, expected_base.join("flutter/dio@5.4.0.tar.gz"));
+    }
+
+    #[test]
+    fn test_scoped_package_flattening() {
+        let config = Config::default();
+        let cache = Cache::new(config.clone());
+        let expected_base = config.cache_path();
+
+        let scoped_path = cache.path_for("bun", "@vitejs/plugin-react", "4.2.1");
+        assert_eq!(
+            scoped_path,
+            expected_base.join("bun/__vitejs__plugin-react@4.2.1.tgz")
+        );
+
+        let types_path = cache.path_for("bun", "@types/node", "20.11.0");
+        assert_eq!(
+            types_path,
+            expected_base.join("bun/__types__node@20.11.0.tgz")
+        );
+    }
+
+    #[test]
+    fn test_compute_and_verify_sha256() {
+        let dir = std::env::temp_dir().join("offpkg_test_cache");
+        fs::create_dir_all(&dir).unwrap();
+        let file_path = dir.join("test_sha256.txt");
+        let mut file = fs::File::create(&file_path).unwrap();
+        file.write_all(b"offpkg cache checksum test").unwrap();
+        drop(file);
+
+        let hash = compute_sha256(&file_path).unwrap();
+        assert!(!hash.is_empty());
+        assert_eq!(hash.len(), 64);
+
+        let config = Config::default();
+        let cache = Cache::new(config);
+        assert!(cache.verify_checksum(&file_path, &hash).unwrap());
+        assert!(!cache
+            .verify_checksum(&file_path, "invalid_checksum")
+            .unwrap());
+
+        let _ = fs::remove_file(file_path);
+    }
 }

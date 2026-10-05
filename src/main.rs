@@ -26,7 +26,7 @@ use crate::db::Database;
 use crate::docs::{fetch_docs, DocsStore};
 use crate::stacks::StackStore;
 use crate::tui::{Label, TUI};
-use crate::update::run_update;
+use crate::update::{run_self_update, run_update};
 use anyhow::{anyhow, Context, Result};
 use clap::{CommandFactory, Parser};
 
@@ -87,7 +87,7 @@ async fn main() -> Result<()> {
                     let files = stack.files.len();
                     tui.print_line(
                         Label::Done,
-                        &format!("{}", stack.name),
+                        &stack.name,
                         Some(&format!(
                             "[{}]  {} packages  {} files  — {}",
                             stack.runtime, total, files, stack.description
@@ -274,19 +274,31 @@ async fn main() -> Result<()> {
                     let result = match stack.runtime.as_str() {
                         "bun" => {
                             let mut a = BunAdapter::new(
-                                config.clone(), db.clone(), cache.clone(), tui.clone(), docs_store.clone(),
+                                config.clone(),
+                                db.clone(),
+                                cache.clone(),
+                                tui.clone(),
+                                docs_store.clone(),
                             );
                             a.add(pkg, skip, dev)
                         }
                         "uv" => {
                             let mut a = UvAdapter::new(
-                                config.clone(), db.clone(), cache.clone(), tui.clone(), docs_store.clone(),
+                                config.clone(),
+                                db.clone(),
+                                cache.clone(),
+                                tui.clone(),
+                                docs_store.clone(),
                             );
                             a.add(pkg, skip, dev)
                         }
                         "flutter" => {
                             let mut a = FlutterAdapter::new(
-                                config.clone(), db.clone(), cache.clone(), tui.clone(), docs_store.clone(),
+                                config.clone(),
+                                db.clone(),
+                                cache.clone(),
+                                tui.clone(),
+                                docs_store.clone(),
                             );
                             a.add(pkg, skip, dev)
                         }
@@ -306,9 +318,15 @@ async fn main() -> Result<()> {
                     }
                 };
 
-                for pkg in &stack.packages { run_add(pkg, false, false); }
-                for pkg in &stack.dev_packages { run_add(pkg, false, true); }
-                for pkg in &stack.transitive_packages { run_add(pkg, true, false); }
+                for pkg in &stack.packages {
+                    run_add(pkg, false, false);
+                }
+                for pkg in &stack.dev_packages {
+                    run_add(pkg, false, true);
+                }
+                for pkg in &stack.transitive_packages {
+                    run_add(pkg, true, false);
+                }
 
                 println!();
                 tui.print_line(
@@ -568,42 +586,50 @@ async fn main() -> Result<()> {
                 }
             }
             FlutterSubcommand::Update { pkg } => {
-                run_update(&mut tui, &db, &cache, &config, pkg.as_deref(), Some("flutter")).await?;
+                run_update(
+                    &mut tui,
+                    &db,
+                    &cache,
+                    &config,
+                    pkg.as_deref(),
+                    Some("flutter"),
+                )
+                .await?;
             }
         },
 
-        Command::SelfUpdate => {
-            tui.print_line(Label::Info, "updating offpkg...", None);
-            let status = std::process::Command::new("sh")
-                .arg("-c")
-                .arg("curl -fsSL https://raw.githubusercontent.com/YOUR_USERNAME/offpkg/main/install.sh | bash")
-                .status()
-                .map_err(|e| anyhow::anyhow!("Failed to run updater: {}", e))?;
-            if status.success() {
-                tui.print_line(
-                    Label::Done,
-                    "offpkg updated",
-                    Some("restart terminal to use new version"),
-                );
-            } else {
-                tui.print_line(
-                    Label::Error,
-                    "update failed",
-                    Some("check your internet connection"),
-                );
-            }
+        Command::SelfUpdate { force } => {
+            run_self_update(&mut tui, force).await?;
         }
 
-        Command::Update { pkg, runtime } => {
-            run_update(
-                &mut tui,
-                &db,
-                &cache,
-                &config,
-                pkg.as_deref(),
-                runtime.as_deref(),
-            )
-            .await?;
+        Command::Update {
+            pkg,
+            runtime,
+            self_update,
+        } => {
+            if self_update || pkg.as_deref() == Some("self") || pkg.as_deref() == Some("offpkg") {
+                run_self_update(&mut tui, false).await?;
+            } else {
+                let all_pkgs = db.list_packages(runtime.as_deref())?;
+                if all_pkgs.is_empty() && pkg.is_none() {
+                    tui.print_line(
+                        Label::Info,
+                        "no cached packages found in catalog",
+                        Some("checking for offpkg self-updates..."),
+                    );
+                    run_self_update(&mut tui, false).await?;
+                } else {
+                    run_update(
+                        &mut tui,
+                        &db,
+                        &cache,
+                        &config,
+                        pkg.as_deref(),
+                        runtime.as_deref(),
+                    )
+                    .await?;
+                }
+            }
         }
     }
 

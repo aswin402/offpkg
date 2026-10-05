@@ -229,3 +229,88 @@ pub async fn run_update(
 
     Ok(())
 }
+
+/// Check if an updated version of offpkg exists on GitHub and run updater if needed
+pub async fn run_self_update(tui: &mut TUI, force: bool) -> Result<()> {
+    tui.render_logo();
+    tui.print_line(Label::Info, "checking for offpkg updates...", None);
+
+    let current_str = env!("CARGO_PKG_VERSION");
+    let current_ver = semver::Version::parse(current_str)
+        .map_err(|e| anyhow!("Failed to parse current version: {}", e))?;
+
+    let client = reqwest::Client::builder().user_agent("offpkg").build()?;
+
+    let remote_ver_str = match client
+        .get("https://raw.githubusercontent.com/aswin402/offpkg/main/Cargo.toml")
+        .send()
+        .await
+    {
+        Ok(resp) => {
+            if resp.status().is_success() {
+                let text = resp.text().await.unwrap_or_default();
+                let mut found = None;
+                for line in text.lines() {
+                    let trimmed = line.trim();
+                    if trimmed.starts_with("version") && trimmed.contains('=') {
+                        if let Some(val) = trimmed.split('=').nth(1) {
+                            found = Some(val.trim().trim_matches('"').trim().to_string());
+                            break;
+                        }
+                    }
+                }
+                found
+            } else {
+                None
+            }
+        }
+        Err(_) => None,
+    };
+
+    if let Some(ref remote_str) = remote_ver_str {
+        if let Ok(remote_ver) = semver::Version::parse(remote_str) {
+            if remote_ver <= current_ver && !force {
+                tui.print_line(
+                    Label::Done,
+                    &format!("offpkg is already up to date (v{})", current_str),
+                    None,
+                );
+                return Ok(());
+            }
+
+            tui.print_line(
+                Label::Info,
+                &format!("new version available: v{} -> v{}", current_str, remote_str),
+                Some("downloading update..."),
+            );
+        }
+    } else {
+        tui.print_line(
+            Label::Warn,
+            "could not check latest version online",
+            Some("running updater script..."),
+        );
+    }
+
+    let status = std::process::Command::new("sh")
+        .arg("-c")
+        .arg("curl -fsSL https://raw.githubusercontent.com/aswin402/offpkg/main/update_offpkg.sh | bash")
+        .status()
+        .map_err(|e| anyhow!("Failed to run updater script: {}", e))?;
+
+    if status.success() {
+        tui.print_line(
+            Label::Done,
+            "offpkg update complete",
+            Some("restart terminal or reload PATH to use new version"),
+        );
+    } else {
+        tui.print_line(
+            Label::Error,
+            "update failed",
+            Some("check internet connection or try building from source"),
+        );
+    }
+
+    Ok(())
+}

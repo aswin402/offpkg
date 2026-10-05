@@ -5,7 +5,8 @@ set -e
 
 INSTALL_DIR="$HOME/.offpkg/bin"
 BINARY="offpkg"
-REPO="https://github.com/aswin/offpkg"
+REPO="https://github.com/aswin402/offpkg"
+RAW_CARGO="https://raw.githubusercontent.com/aswin402/offpkg/main/Cargo.toml"
 CYAN="\033[38;2;0;212;224m"
 GREEN="\033[38;2;0;229;160m"
 AMBER="\033[38;2;245;166;35m"
@@ -25,13 +26,27 @@ echo -e "${MUTED}──────────────────${RESET}"
 echo ""
 
 # Current version
+CURRENT_VERSION=""
 if [ -f "$INSTALL_DIR/$BINARY" ]; then
-  CURRENT="$("$INSTALL_DIR/$BINARY" --version 2>/dev/null || echo 'unknown')"
-  step "current version: $CURRENT"
+  CURRENT_STR="$("$INSTALL_DIR/$BINARY" --version 2>/dev/null || echo 'unknown')"
+  CURRENT_VERSION=$(echo "$CURRENT_STR" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -n1 || echo '')
+  step "current version: ${CURRENT_STR:-$CURRENT_VERSION}"
 else
   warn "offpkg not found at $INSTALL_DIR — running fresh install"
   curl -fsSL "${REPO}/raw/main/install.sh" | bash
   exit 0
+fi
+
+# Check latest version from repository
+step "checking for updates..."
+LATEST_VERSION="$(curl -fsSL "$RAW_CARGO" 2>/dev/null | grep -E '^version = ' | head -n1 | cut -d '"' -f2 || echo '')"
+
+if [ -n "$LATEST_VERSION" ] && [ -n "$CURRENT_VERSION" ]; then
+  if [ "$CURRENT_VERSION" = "$LATEST_VERSION" ] && [ "$1" != "--force" ] && [ "$1" != "-f" ]; then
+    done_ "offpkg is already up to date (v${CURRENT_VERSION})"
+    exit 0
+  fi
+  step "new version available: v${CURRENT_VERSION} → v${LATEST_VERSION}"
 fi
 
 # Detect OS/arch
@@ -53,25 +68,35 @@ has_cmd() { command -v "$1" &>/dev/null; }
 
 # ── Try pre-built binary first ────────────────────────────────────────────────
 
-RELEASE_URL="${REPO}/releases/latest/download/${BINARY}-${OS_NAME}-${ARCH_NAME}"
-[ "$OS_NAME" = "windows" ] && RELEASE_URL="${RELEASE_URL}.exe"
-
 try_prebuilt() {
-  step "checking for new release..."
+  step "checking for pre-built binary..."
   TMP="$(mktemp)"
-  HTTP_CODE=0
 
-  if has_cmd curl; then
-    HTTP_CODE=$(curl -sL -o "$TMP" -w "%{http_code}" "$RELEASE_URL")
-  elif has_cmd wget; then
-    wget -qO "$TMP" "$RELEASE_URL" && HTTP_CODE=200
-  fi
+  local EXT=""
+  [ "$OS_NAME" = "windows" ] && EXT=".exe"
 
-  if [ "$HTTP_CODE" = "200" ] && [ -s "$TMP" ]; then
-    chmod +x "$TMP"
-    mv "$TMP" "$INSTALL_DIR/$BINARY"
-    return 0
+  local URLS=()
+  if [ -n "$LATEST_VERSION" ]; then
+    URLS+=("${REPO}/releases/download/v${LATEST_VERSION}/${BINARY}-${OS_NAME}-${ARCH_NAME}${EXT}")
   fi
+  URLS+=("${REPO}/releases/latest/download/${BINARY}-${OS_NAME}-${ARCH_NAME}${EXT}")
+
+  for URL in "${URLS[@]}"; do
+    local HTTP_CODE=0
+    if has_cmd curl; then
+      HTTP_CODE=$(curl -sL -o "$TMP" -w "%{http_code}" "$URL")
+    elif has_cmd wget; then
+      wget -qO "$TMP" "$URL" && HTTP_CODE=200
+    fi
+
+    if [ "$HTTP_CODE" = "200" ] && [ -s "$TMP" ]; then
+      mkdir -p "$INSTALL_DIR"
+      chmod +x "$TMP"
+      mv "$TMP" "$INSTALL_DIR/$BINARY"
+      return 0
+    fi
+  done
+
   rm -f "$TMP"
   return 1
 }

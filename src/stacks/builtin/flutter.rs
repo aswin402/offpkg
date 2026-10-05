@@ -1,9 +1,10 @@
 use crate::stacks::{Stack, StackFile};
 
 pub fn flutter_riverpod(app_name: Option<&str>) -> Stack {
-    let name = app_name.unwrap_or("my_app").to_string();
+    let name = app_name.unwrap_or("").to_string();
 
     let title = app_name
+        .filter(|s| !s.is_empty())
         .map(|s| {
             let mut t = s.to_string();
             if let Some(first) = t.get_mut(0..1) {
@@ -11,10 +12,10 @@ pub fn flutter_riverpod(app_name: Option<&str>) -> Stack {
             }
             t
         })
-        .unwrap_or_else(|| "Offpkg_flutter-riverpod".to_string());
+        .unwrap_or_else(|| "Offpkg Flutter App".to_string());
 
     Stack {
-        name: if name.is_empty() { "flutter-riverpod".into() } else { format!("flutter-riverpod-{}", name).into() },
+        name: if name.is_empty() { "flutter-riverpod".into() } else { format!("flutter-riverpod-{}", name) },
         runtime: "flutter".into(),
         description: "Flutter + Riverpod/HooksRiverpod + GoRouter + Dio + Material 3 (Custom Extensions) + Logger + Google Fonts".into(),
         packages: vec![
@@ -1475,7 +1476,7 @@ class MyApp extends ConsumerWidget {{
   }}
 }}"##,
                     title = title
-                ).into(),
+                ),
                 binary_content: None,
             },
             StackFile {

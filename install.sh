@@ -3,7 +3,7 @@ set -e
 
 # ── offpkg installer ─────────────────────────────────────────────────────────
 
-REPO="https://github.com/aswin/offpkg"
+REPO="https://github.com/aswin402/offpkg"
 BINARY="offpkg"
 INSTALL_DIR="$HOME/.offpkg/bin"
 CYAN="\033[38;2;0;212;224m"

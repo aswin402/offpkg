@@ -6,7 +6,7 @@
 
 <p align="center">
   <a href="https://www.rust-lang.org/"><img src="https://img.shields.io/badge/Rust-1.80%2B-blue?logo=rust" alt="Rust"/></a>
-  <img src="https://img.shields.io/badge/version-0.1.6-green" alt="Version"/>
+  <img src="https://img.shields.io/badge/version-0.1.7-green" alt="Version"/>
   <img src="https://img.shields.io/badge/license-MIT-blue" alt="License"/>
 </p>
 
@@ -37,6 +37,7 @@
 - **🏗️ Pristine Stacks**: Scaffold entire application templates offline in under a second (configurations, files, and deep transitive dependencies).
 - **📝 Global Offline Docs**: Modify fetched package READMEs once with `offpkg docs edit`, and have your custom versions auto-copied to every new project folder under `offpkg_docs/`.
 - **🩺 Interactive TUI & Doctor**: Features animated spinners, colored status labels, progress bars, and environment diagnostics to verify runtime compatibility.
+- **🔄 Auto-Updating Engine**: Update packages or offpkg itself seamlessly via `offpkg update self` or `offpkg self-update`.
 - **🧹 Cache Pruner**: `remove <pkg>` deletes cached archives and DB entries while displaying freed disk space.
 
 ---
@@ -59,27 +60,44 @@ offpkg docs edit react           →    offpkg_docs/offpkg_react.md (every proje
 ╔═╗╔═╗╔═╗╔═╗╦╔═╔═╗
 ║ ║╠╣ ╠╣ ╠═╝╠╩╗║ ╦
 ╚═╝╚  ╚  ╩  ╩ ╩╚═╝
-offpkg v0.1.6 · universal offline package manager
+offpkg v0.1.7 · universal offline package manager
 ```
 
 ---
 
 ## Quickstart 🚀
 
-### Prerequisites
+### One-Line Install (Single Binary)
 
-- Rust 1.80+
-- At least one runtime: `bun`, `uv`, `flutter` (all optional — doctor shows what's missing)
-
-### Build & Install
+Download and install the standalone `offpkg` binary in seconds:
 
 ```bash
-git clone <repo> && cd offpkg
-cargo build --release
-cargo install --path .
+# Using curl (Linux & macOS)
+curl -fsSL https://raw.githubusercontent.com/aswin402/offpkg/main/install.sh | bash
 
-# Verify
+# Or using wget
+wget -qO- https://raw.githubusercontent.com/aswin402/offpkg/main/install.sh | bash
+
+# Or via Cargo (from git)
+cargo install --git https://github.com/aswin402/offpkg.git
+```
+
+### Self-Updating
+
+Keep `offpkg` current with a single command:
+
+```bash
+# Check GitHub releases and update binary automatically
+offpkg update self
+# Or via alias
+offpkg self-update
+```
+
+### Verification & Health Check
+
+```bash
 offpkg doctor
+offpkg stack list
 ```
 
 ---
@@ -151,6 +169,8 @@ offpkg docs list --runtime flutter
 offpkg list                        # show all cached packages
 offpkg list --runtime bun          # filter by runtime
 offpkg doctor                      # environment health check
+offpkg update self                 # check for new version and update offpkg binary
+offpkg self-update                 # alias for binary update
 ```
 
 ---
@@ -168,7 +188,7 @@ offpkg doctor                      # environment health check
 | **`mern`** | bun | MERN Stack - Express + React + MongoDB + TypeScript (Monorepo) |
 | **`pern`** | bun | PERN Stack - Express + React + PostgreSQL + Prisma + TypeScript (Monorepo) |
 | **`fastapi`** | uv | FastAPI + SQLAlchemy (Async) + Alembic + Pydantic v2 + structlog |
-| **`flutter-riverpod-my_app`** | flutter | Flutter + Riverpod/Hooks + GoRouter + Dio + Material 3 + Logger + Google Fonts |
+| **`flutter-riverpod`** | flutter | Flutter + Riverpod/Hooks + GoRouter + Dio + Material 3 + Logger + Google Fonts |
 
 Each stack also generates starter config files (`vite.config.ts`, `tsconfig.json`, `main.dart`, etc.) automatically.
 Furthermore, the React/Next stacks natively embed global **binary assets** (e.g. `hero.png`) and fully resolve **all deep dependencies** directly into `node_modules` without altering your project configuration.

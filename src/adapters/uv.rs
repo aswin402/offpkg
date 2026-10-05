@@ -247,25 +247,7 @@ impl UvAdapter {
         }
 
         let content = std::fs::read_to_string(&pyproject_path)?;
-        let parsed: toml::Value = toml::from_str(&content)
-            .map_err(|e| anyhow!("Failed to parse pyproject.toml: {}", e))?;
-
-        let deps = parsed
-            .get("project")
-            .and_then(|p| p.get("dependencies"))
-            .and_then(|d| d.as_array())
-            .ok_or_else(|| anyhow!("No [project.dependencies] in pyproject.toml"))?;
-
-        let pkg_names: Vec<String> = deps
-            .iter()
-            .filter_map(|d| d.as_str())
-            .map(|d| {
-                d.split(|c: char| !c.is_alphanumeric() && c != '-' && c != '_')
-                    .next()
-                    .unwrap_or(d)
-                    .to_lowercase()
-            })
-            .collect();
+        let pkg_names = parse_pyproject_deps(&content)?;
 
         self.tui.print_line(
             Label::Info,
@@ -321,5 +303,61 @@ impl UvAdapter {
             );
         }
         Ok(())
+    }
+}
+
+pub(crate) fn parse_pyproject_deps(content: &str) -> Result<Vec<String>> {
+    let parsed: toml::Value =
+        toml::from_str(content).map_err(|e| anyhow!("Failed to parse pyproject.toml: {}", e))?;
+
+    let deps = parsed
+        .get("project")
+        .and_then(|p| p.get("dependencies"))
+        .and_then(|d| d.as_array())
+        .ok_or_else(|| anyhow!("No [project.dependencies] in pyproject.toml"))?;
+
+    let pkg_names: Vec<String> = deps
+        .iter()
+        .filter_map(|d| d.as_str())
+        .map(|d| {
+            d.split(|c: char| !c.is_alphanumeric() && c != '-' && c != '_')
+                .next()
+                .unwrap_or(d)
+                .to_lowercase()
+        })
+        .collect();
+
+    Ok(pkg_names)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_parse_pyproject_deps() {
+        let content = r#"
+[project]
+name = "my-fastapi-app"
+version = "0.1.0"
+dependencies = [
+    "fastapi>=0.110.0",
+    "uvicorn[standard]>=0.28.0",
+    "pydantic==2.6.4",
+    "requests",
+]
+"#;
+        let deps = parse_pyproject_deps(content).unwrap();
+        assert_eq!(deps, vec!["fastapi", "uvicorn", "pydantic", "requests"]);
+    }
+
+    #[test]
+    fn test_parse_pyproject_missing_deps() {
+        let content = r#"
+[project]
+name = "empty-project"
+"#;
+        let res = parse_pyproject_deps(content);
+        assert!(res.is_err());
     }
 }

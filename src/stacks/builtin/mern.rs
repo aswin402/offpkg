@@ -150,7 +150,7 @@ export default router;"##.into(),
                 path: "backend/.env".into(),
                 content: "MONGODB_URI=mongodb://localhost:27017/mern\nPORT=5000\nJWT_SECRET=your_jwt_secret".into(), binary_content: None,
             },
-            
+
             // Frontend (same as react_vite_full)
             StackFile {
                 path: "frontend/vite.config.ts".into(),
@@ -246,7 +246,7 @@ export default {
 }"##.into(),
                 binary_content: None,
             },
-            
+
             // Root files
             StackFile {
                 path: "package.json".into(),

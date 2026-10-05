@@ -41,12 +41,8 @@ const RESET: &str = "\x1b[0m";
 fn prompt(label: &str, hint: Option<&str>) -> Result<String> {
     if let Some(h) = hint {
         print!(
-            "  {}{}{} {} {} ",
-            BOLD,
-            CYAN,
-            label,
-            RESET,
-            format!("{}({}){}", MUTED, h, RESET)
+            "  {}{}{} {} {}({}){} ",
+            BOLD, CYAN, label, RESET, MUTED, h, RESET
         );
     } else {
         print!("  {}{}{} {} ", BOLD, CYAN, label, RESET);

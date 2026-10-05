@@ -3,7 +3,7 @@ use clap::{Parser, Subcommand};
 #[derive(Parser)]
 #[command(
     name = "offpkg",
-    version = "0.1.6",
+    version = env!("CARGO_PKG_VERSION"),
     about = "Universal offline package manager — cache packages once, install forever",
     long_about = "offpkg caches packages from npm (bun), PyPI (uv), and pub.dev (flutter)\nso you can install them later without an internet connection.\n\nWorkflow:\n  1. Cache packages online  →  offpkg <runtime> install <pkg>\n  2. Add to project offline →  offpkg <runtime> add <pkg>",
     disable_version_flag = true
@@ -39,13 +39,16 @@ pub enum Command {
         #[command(subcommand)]
         subcmd: StackSubcommand,
     },
-    /// Update cached packages to latest versions (docs are never changed)
+    /// Update cached packages to latest versions, or update offpkg binary itself with --self
     Update {
-        /// Specific package name to update (omit to update all)
+        /// Specific package name to update, or 'self' to update offpkg (omit to update all)
         pkg: Option<String>,
         /// Only update packages for this runtime
         #[arg(long, value_parser = ["bun", "uv", "flutter"])]
         runtime: Option<String>,
+        /// Update offpkg binary itself to the latest version
+        #[arg(long = "self", visible_alias = "self-update", short = 's')]
+        self_update: bool,
     },
     /// List all cached packages (optionally filter by runtime)
     List {
@@ -61,7 +64,12 @@ pub enum Command {
     /// Run diagnostics to check offpkg health and configuration
     Doctor,
     /// Update offpkg itself to the latest version
-    SelfUpdate,
+    #[command(alias = "selfupdate", alias = "upgrade")]
+    SelfUpdate {
+        /// Force reinstallation even if already on latest version
+        #[arg(long, short = 'f')]
+        force: bool,
+    },
 }
 
 // ── Bun ──────────────────────────────────────────────────────────────────────
@@ -216,4 +224,239 @@ pub enum DocsSubcommand {
         #[arg(long, value_parser = ["bun", "uv", "flutter"])]
         runtime: Option<String>,
     },
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_version_flag() {
+        let args = Args::try_parse_from(["offpkg", "-V"]).unwrap();
+        assert!(args.version);
+
+        let args = Args::try_parse_from(["offpkg", "--version"]).unwrap();
+        assert!(args.version);
+    }
+
+    #[test]
+    fn test_bun_subcommands() {
+        let args = Args::try_parse_from(["offpkg", "bun", "install", "react"]).unwrap();
+        match args.command {
+            Some(Command::Bun {
+                subcmd: BunSubcommand::Install { pkg },
+            }) => {
+                assert_eq!(pkg, "react");
+            }
+            _ => panic!("Expected Bun Install"),
+        }
+
+        let args = Args::try_parse_from(["offpkg", "bun", "add", "react"]).unwrap();
+        match args.command {
+            Some(Command::Bun {
+                subcmd: BunSubcommand::Add { pkg },
+            }) => {
+                assert_eq!(pkg, "react");
+            }
+            _ => panic!("Expected Bun Add"),
+        }
+
+        let args = Args::try_parse_from(["offpkg", "bun", "remove", "react"]).unwrap();
+        match args.command {
+            Some(Command::Bun {
+                subcmd: BunSubcommand::Remove { pkg },
+            }) => {
+                assert_eq!(pkg, "react");
+            }
+            _ => panic!("Expected Bun Remove"),
+        }
+
+        let args = Args::try_parse_from(["offpkg", "bun", "list"]).unwrap();
+        assert!(matches!(
+            args.command,
+            Some(Command::Bun {
+                subcmd: BunSubcommand::List
+            })
+        ));
+
+        let args = Args::try_parse_from(["offpkg", "bun", "update"]).unwrap();
+        assert!(matches!(
+            args.command,
+            Some(Command::Bun {
+                subcmd: BunSubcommand::Update { pkg: None }
+            })
+        ));
+    }
+
+    #[test]
+    fn test_uv_subcommands() {
+        let args = Args::try_parse_from(["offpkg", "uv", "install", "requests"]).unwrap();
+        match args.command {
+            Some(Command::Uv {
+                subcmd: UvSubcommand::Install { pkg },
+            }) => {
+                assert_eq!(pkg, "requests");
+            }
+            _ => panic!("Expected Uv Install"),
+        }
+
+        let args = Args::try_parse_from(["offpkg", "uv", "add", "requests"]).unwrap();
+        match args.command {
+            Some(Command::Uv {
+                subcmd: UvSubcommand::Add { pkg },
+            }) => {
+                assert_eq!(pkg, "requests");
+            }
+            _ => panic!("Expected Uv Add"),
+        }
+
+        let args = Args::try_parse_from(["offpkg", "uv", "install-all"]).unwrap();
+        assert!(matches!(
+            args.command,
+            Some(Command::Uv {
+                subcmd: UvSubcommand::InstallAll
+            })
+        ));
+    }
+
+    #[test]
+    fn test_flutter_subcommands() {
+        let args = Args::try_parse_from(["offpkg", "flutter", "install", "dio"]).unwrap();
+        match args.command {
+            Some(Command::Flutter {
+                subcmd: FlutterSubcommand::Install { pkg },
+            }) => {
+                assert_eq!(pkg, "dio");
+            }
+            _ => panic!("Expected Flutter Install"),
+        }
+
+        let args = Args::try_parse_from(["offpkg", "flutter", "add", "dio"]).unwrap();
+        match args.command {
+            Some(Command::Flutter {
+                subcmd: FlutterSubcommand::Add { pkg },
+            }) => {
+                assert_eq!(pkg, "dio");
+            }
+            _ => panic!("Expected Flutter Add"),
+        }
+
+        let args = Args::try_parse_from(["offpkg", "flutter", "install-all"]).unwrap();
+        assert!(matches!(
+            args.command,
+            Some(Command::Flutter {
+                subcmd: FlutterSubcommand::InstallAll
+            })
+        ));
+    }
+
+    #[test]
+    fn test_stack_subcommands() {
+        let args = Args::try_parse_from(["offpkg", "stack", "list"]).unwrap();
+        assert!(matches!(
+            args.command,
+            Some(Command::Stack {
+                subcmd: StackSubcommand::List
+            })
+        ));
+
+        let args = Args::try_parse_from(["offpkg", "stack", "show", "react-vite"]).unwrap();
+        match args.command {
+            Some(Command::Stack {
+                subcmd: StackSubcommand::Show { name },
+            }) => {
+                assert_eq!(name, "react-vite");
+            }
+            _ => panic!("Expected Stack Show"),
+        }
+
+        let args = Args::try_parse_from(["offpkg", "stack", "new"]).unwrap();
+        assert!(matches!(
+            args.command,
+            Some(Command::Stack {
+                subcmd: StackSubcommand::New
+            })
+        ));
+    }
+
+    #[test]
+    fn test_docs_subcommands() {
+        let args =
+            Args::try_parse_from(["offpkg", "docs", "edit", "react", "--runtime", "bun"]).unwrap();
+        match args.command {
+            Some(Command::Docs {
+                subcmd: DocsSubcommand::Edit { pkg, runtime },
+            }) => {
+                assert_eq!(pkg, "react");
+                assert_eq!(runtime, "bun");
+            }
+            _ => panic!("Expected Docs Edit"),
+        }
+
+        let args =
+            Args::try_parse_from(["offpkg", "docs", "show", "fastapi", "--runtime", "uv"]).unwrap();
+        match args.command {
+            Some(Command::Docs {
+                subcmd: DocsSubcommand::Show { pkg, runtime },
+            }) => {
+                assert_eq!(pkg, "fastapi");
+                assert_eq!(runtime, "uv");
+            }
+            _ => panic!("Expected Docs Show"),
+        }
+    }
+
+    #[test]
+    fn test_general_and_validation() {
+        let args = Args::try_parse_from(["offpkg", "doctor"]).unwrap();
+        assert!(matches!(args.command, Some(Command::Doctor)));
+
+        let args = Args::try_parse_from(["offpkg", "self-update"]).unwrap();
+        assert!(matches!(
+            args.command,
+            Some(Command::SelfUpdate { force: false })
+        ));
+
+        let args = Args::try_parse_from(["offpkg", "selfupdate", "--force"]).unwrap();
+        assert!(matches!(
+            args.command,
+            Some(Command::SelfUpdate { force: true })
+        ));
+
+        let args = Args::try_parse_from(["offpkg", "upgrade"]).unwrap();
+        assert!(matches!(
+            args.command,
+            Some(Command::SelfUpdate { force: false })
+        ));
+
+        let args = Args::try_parse_from(["offpkg", "update", "--self"]).unwrap();
+        assert!(matches!(
+            args.command,
+            Some(Command::Update {
+                pkg: None,
+                runtime: None,
+                self_update: true
+            })
+        ));
+
+        let args = Args::try_parse_from(["offpkg", "update", "self"]).unwrap();
+        assert!(matches!(
+            args.command,
+            Some(Command::Update {
+                pkg: Some(ref p),
+                runtime: None,
+                self_update: false
+            }) if p == "self"
+        ));
+
+        let args = Args::try_parse_from(["offpkg", "list", "--runtime", "bun"]).unwrap();
+        match args.command {
+            Some(Command::List { runtime }) => assert_eq!(runtime, Some("bun".to_string())),
+            _ => panic!("Expected List"),
+        }
+
+        // Invalid runtime should fail parsing
+        let result = Args::try_parse_from(["offpkg", "list", "--runtime", "unknown"]);
+        assert!(result.is_err());
+    }
 }

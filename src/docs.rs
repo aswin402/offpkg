@@ -21,7 +21,7 @@ impl DocsStore {
     /// ~/.offpkg/docs/<runtime>/<safe_pkg>.md  — the global master copy you edit
     /// Scoped packages like @vitejs/plugin-react become __vitejs__plugin-react.md
     pub fn global_doc_path(&self, runtime: &str, pkg: &str) -> PathBuf {
-        let safe = pkg.replace('@', "__").replace('/', "__");
+        let safe = pkg.replace(['@', '/'], "__");
         self.docs_dir(runtime).join(format!("{}.md", safe))
     }
 
@@ -68,7 +68,7 @@ impl DocsStore {
 
         // File is named offpkg_<safe_pkg>.md in the project
         // Scoped packages: @vitejs/plugin-react -> offpkg___vitejs__plugin-react.md
-        let safe = pkg.replace('@', "__").replace('/', "__");
+        let safe = pkg.replace(['@', '/'], "__");
         let dest = project_docs_dir.join(format!("offpkg_{}.md", safe));
         fs::copy(&global_path, &dest)?;
 

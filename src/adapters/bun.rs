@@ -286,7 +286,11 @@ fn update_package_json(cwd: &Path, pkg_name: &str, version: &str, is_dev: bool) 
             "dependencies": {}
         })
     };
-    let target_key = if is_dev { "devDependencies" } else { "dependencies" };
+    let target_key = if is_dev {
+        "devDependencies"
+    } else {
+        "dependencies"
+    };
     if let Some(deps) = json.get_mut(target_key).and_then(|d| d.as_object_mut()) {
         deps.insert(
             pkg_name.to_string(),
@@ -315,18 +319,30 @@ fn create_bin_links(pkg_dir: &Path, node_modules: &Path) -> Result<()> {
     fs::create_dir_all(&bin_dir)?;
 
     let pkg_name = pkg_json.get("name").and_then(|n| n.as_str()).unwrap_or("");
-    let rel_prefix = Path::new("..").join(pkg_dir.strip_prefix(node_modules).unwrap_or(pkg_dir.file_name().map(Path::new).unwrap_or(Path::new(""))));
+    let rel_prefix = Path::new("..").join(
+        pkg_dir
+            .strip_prefix(node_modules)
+            .unwrap_or(pkg_dir.file_name().map(Path::new).unwrap_or(Path::new(""))),
+    );
 
     match bin_field {
         serde_json::Value::String(path) => {
             if !pkg_name.is_empty() {
-                link_bin(pkg_dir.join(path), bin_dir.join(pkg_name), rel_prefix.join(path))?;
+                link_bin(
+                    pkg_dir.join(path),
+                    bin_dir.join(pkg_name),
+                    rel_prefix.join(path),
+                )?;
             }
         }
         serde_json::Value::Object(map) => {
             for (name, path) in map {
                 if let Some(path_str) = path.as_str() {
-                    link_bin(pkg_dir.join(path_str), bin_dir.join(name), rel_prefix.join(path_str))?;
+                    link_bin(
+                        pkg_dir.join(path_str),
+                        bin_dir.join(name),
+                        rel_prefix.join(path_str),
+                    )?;
                 }
             }
         }
@@ -336,7 +352,11 @@ fn create_bin_links(pkg_dir: &Path, node_modules: &Path) -> Result<()> {
     Ok(())
 }
 
-fn link_bin(src_abs: std::path::PathBuf, dest: std::path::PathBuf, rel_target: std::path::PathBuf) -> Result<()> {
+fn link_bin(
+    src_abs: std::path::PathBuf,
+    dest: std::path::PathBuf,
+    rel_target: std::path::PathBuf,
+) -> Result<()> {
     #[cfg(unix)]
     {
         use std::os::unix::fs::symlink;
@@ -355,4 +375,36 @@ fn link_bin(src_abs: std::path::PathBuf, dest: std::path::PathBuf, rel_target: s
         }
     }
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_update_package_json_fresh() {
+        let nanos = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_nanos();
+        let test_dir = std::env::temp_dir().join(format!("offpkg_bun_test_{}", nanos));
+        fs::create_dir_all(&test_dir).unwrap();
+
+        // Fresh package.json creation
+        update_package_json(&test_dir, "react", "19.0.0", false).unwrap();
+        let pkg_json: serde_json::Value =
+            serde_json::from_str(&fs::read_to_string(test_dir.join("package.json")).unwrap())
+                .unwrap();
+        assert_eq!(pkg_json["dependencies"]["react"], "^19.0.0");
+
+        // Add devDependency to existing package.json
+        update_package_json(&test_dir, "typescript", "5.4.0", true).unwrap();
+        let pkg_json: serde_json::Value =
+            serde_json::from_str(&fs::read_to_string(test_dir.join("package.json")).unwrap())
+                .unwrap();
+        assert_eq!(pkg_json["dependencies"]["react"], "^19.0.0");
+        assert_eq!(pkg_json["devDependencies"]["typescript"], "^5.4.0");
+
+        let _ = fs::remove_dir_all(test_dir);
+    }
 }

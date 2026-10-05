@@ -204,7 +204,7 @@ impl ProgressBar {
                 };
 
                 // Label above bar, bar below — matches the screenshot layout
-                print!("{}  {}{}{} {}", CLEAR_LINE, MUTED, lbl, RESET, "");
+                print!("{}  {}{}{} ", CLEAR_LINE, MUTED, lbl, RESET);
                 // Move to next line and print bar
                 print!(
                     "
@@ -221,13 +221,12 @@ impl ProgressBar {
 
             // Print final full bar on its own line
             print!("{}", CLEAR_LINE);
+            let full_bar = format!("{}{}{}", CYAN, "─".repeat(TERM_BAR_WIDTH), RESET);
             print!(
                 "
 {}{}{}
 ",
-                CLEAR_LINE,
-                format!("{}{}{}", CYAN, "─".repeat(TERM_BAR_WIDTH), RESET),
-                RESET
+                CLEAR_LINE, full_bar, RESET
             );
             io::stdout().flush().ok();
         });
@@ -385,8 +384,10 @@ impl TUI {
         println!("{}{}║ ║╠╣ ╠╣ ╠═╝╠╩╗║ ╦{}", BOLD, CYAN, RESET);
         println!("{}{}╚═╝╚  ╚  ╩  ╩ ╩╚═╝{}", BOLD, CYAN, RESET);
         println!(
-            "  {}offpkg v0.1.6 · universal offline package manager{}",
-            MUTED, RESET
+            "  {}offpkg v{} · universal offline package manager{}",
+            MUTED,
+            env!("CARGO_PKG_VERSION"),
+            RESET
         );
         println!();
         io::stdout().flush().ok();

@@ -174,7 +174,7 @@ export default router;"##.into(),
                 path: "backend/.env".into(),
                 content: "DATABASE_URL=\"postgresql://postgres:password@localhost:5432/pern\"\nPORT=5000\nJWT_SECRET=your_jwt_secret".into(), binary_content: None,
             },
-            
+
             // Frontend (same as PERN but proxy to 5000)
             StackFile {
                 path: "frontend/vite.config.ts".into(),
@@ -248,7 +248,7 @@ export default function App() {
 }"##.into(),
                 binary_content: None,
             },
-            
+
             // Root monorepo files
             StackFile {
                 path: "package.json".into(),

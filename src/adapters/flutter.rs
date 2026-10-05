@@ -258,13 +258,11 @@ impl FlutterAdapter {
             ));
         }
         let content = fs::read_to_string(&pubspec_path)?;
-        if !skip_config {
-            if !content.contains(&format!("  {}:", pkg)) {
-                let updated = insert_pubspec_dep(&content, pkg, version)?;
-                fs::write(&pubspec_path, updated)?;
-                self.tui
-                    .print_line(Label::Link, "added to pubspec.yaml", Some(pkg));
-            }
+        if !skip_config && !content.contains(&format!("  {}:", pkg)) {
+            let updated = insert_pubspec_dep(&content, pkg, version)?;
+            fs::write(&pubspec_path, updated)?;
+            self.tui
+                .print_line(Label::Link, "added to pubspec.yaml", Some(pkg));
         }
         let output = Command::new("flutter")
             .args(["pub", "get", "--offline"])
@@ -416,11 +414,50 @@ fn parse_pubspec_deps(content: &str) -> Vec<String> {
 
 fn insert_pubspec_dep(content: &str, pkg: &str, version: &str) -> Result<String> {
     let dep_line = format!("  {}: ^{}", pkg, version);
-    let mut lines: Vec<&str> = content.lines().collect();
+    let mut lines: Vec<String> = content.lines().map(String::from).collect();
     let insert_at = lines
         .iter()
         .position(|l| l.trim() == "dependencies:")
         .ok_or_else(|| anyhow!("No 'dependencies:' in pubspec.yaml"))?;
-    lines.insert(insert_at + 1, Box::leak(dep_line.into_boxed_str()));
+    lines.insert(insert_at + 1, dep_line);
     Ok(lines.join("\n"))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_parse_pubspec_deps() {
+        let content = r#"
+name: sample_flutter_app
+description: A sample flutter application
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  dio: ^5.4.0
+  provider: ^6.1.1
+  # commented_dep: ^1.0.0
+  flutter_svg: ^2.0.9
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+"#;
+        let deps = parse_pubspec_deps(content);
+        assert_eq!(deps, vec!["dio", "provider", "flutter_svg"]);
+    }
+
+    #[test]
+    fn test_insert_pubspec_dep() {
+        let content = "name: app\ndependencies:\n  flutter:\n    sdk: flutter\n";
+        let updated = insert_pubspec_dep(content, "dio", "5.4.0").unwrap();
+        assert!(updated.contains("  dio: ^5.4.0"));
+        assert!(updated.starts_with("name: app\ndependencies:\n  dio: ^5.4.0\n"));
+    }
 }
