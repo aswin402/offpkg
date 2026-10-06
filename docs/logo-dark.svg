@@ -1,15 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 260" width="100%" height="100%">
   <defs>
-    <!-- Fonts & Animations -->
     <style>
-      @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800;900&amp;family=JetBrains+Mono:wght@500;600;700&amp;display=swap');
-
-      text {
-        font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      }
-      .mono {
-        font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      }
+      @import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800;900&amp;family=JetBrains+Mono:wght@500;600;700&amp;display=swap");
+      text { font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+      .mono { font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace; }
 
       /* Floating Animation */
       @keyframes float {
@@ -23,26 +17,16 @@
 
       /* Cyan Glow Pulse */
       @keyframes neon-pulse {
-        0%, 100% { opacity: 0.88; filter: drop-shadow(0 0 5px #00f2fe); }
-        50% { opacity: 1.0; filter: drop-shadow(0 0 14px #00f2fe); }
+        0%, 100% { opacity: 0.88; filter: drop-shadow(0 0 4px #00f2fe); }
+        50% { opacity: 1.0; filter: drop-shadow(0 0 10px #00f2fe); }
       }
       .pulse-cyan {
         animation: neon-pulse 3.2s ease-in-out infinite;
       }
 
-      /* Orbital Rotation */
-      @keyframes orbit {
-        from { transform: rotate(0deg); }
-        to { transform: rotate(360deg); }
-      }
-      .orbital-ring {
-        transform-origin: 130px 130px;
-        animation: orbit 22s linear infinite;
-      }
-
-      /* Wi-Fi Waves Sequential Pulse */
+      /* Wi-Fi Waves Pulse */
       @keyframes wave-pulse {
-        0%, 100% { opacity: 0.35; }
+        0%, 100% { opacity: 0.4; }
         50% { opacity: 1.0; }
       }
       .wave-1 { animation: wave-pulse 2.2s ease-in-out infinite; }
@@ -51,99 +35,183 @@
 
       /* Laser Slash Pulse */
       @keyframes laser {
-        0%, 100% { filter: drop-shadow(0 0 4px #ff3366); opacity: 0.92; }
-        50% { filter: drop-shadow(0 0 10px #ff3366); opacity: 1; }
+        0%, 100% { filter: drop-shadow(0 0 3px #ff3366); opacity: 0.92; }
+        50% { filter: drop-shadow(0 0 8px #ff3366); opacity: 1; }
       }
       .laser-slash {
         animation: laser 2.8s ease-in-out infinite;
       }
+
+      /* Descending Packages into box cavity */
+      @keyframes dropPackage1 {
+        0% { transform: translate(0, -60px); opacity: 0; }
+        18% { opacity: 1; }
+        72% { opacity: 1; transform: translate(0, 26px); }
+        88%, 100% { opacity: 0; transform: translate(0, 42px); }
+      }
+      @keyframes dropPackage2 {
+        0% { transform: translate(0, -56px); opacity: 0; }
+        18% { opacity: 1; }
+        72% { opacity: 1; transform: translate(0, 28px); }
+        88%, 100% { opacity: 0; transform: translate(0, 44px); }
+      }
+      @keyframes dropPackage3 {
+        0% { transform: translate(0, -64px); opacity: 0; }
+        18% { opacity: 1; }
+        72% { opacity: 1; transform: translate(0, 24px); }
+        88%, 100% { opacity: 0; transform: translate(0, 40px); }
+      }
+
+      .package-drop-1 { animation: dropPackage1 3.4s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
+      .package-drop-2 { animation: dropPackage2 3.4s cubic-bezier(0.4, 0, 0.2, 1) infinite 1.15s; }
+      .package-drop-3 { animation: dropPackage3 3.4s cubic-bezier(0.4, 0, 0.2, 1) infinite 2.3s; }
     </style>
 
     <!-- Gradients -->
-    <linearGradient id="cyan-glow-dark" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="cyan-glow" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#00f2fe" />
       <stop offset="100%" stop-color="#38bdf8" />
     </linearGradient>
 
-    <linearGradient id="purple-glow-dark" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="purple-glow" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#818cf8" />
       <stop offset="100%" stop-color="#c084fc" />
     </linearGradient>
 
-    <linearGradient id="box-top-inner-dark" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="box-top-inner" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#0f172a" />
       <stop offset="100%" stop-color="#020617" />
     </linearGradient>
 
-    <linearGradient id="box-left-face-dark" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="box-left-face" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#0c1222" />
       <stop offset="100%" stop-color="#040711" />
     </linearGradient>
 
-    <linearGradient id="box-right-face-dark" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="box-right-face" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#111827" />
       <stop offset="100%" stop-color="#030712" />
     </linearGradient>
 
-    <linearGradient id="flap-left-grad-dark" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="flap-left-grad" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#1e293b" stop-opacity="0.9" />
       <stop offset="100%" stop-color="#0f172a" stop-opacity="0.95" />
     </linearGradient>
 
-    <linearGradient id="flap-right-grad-dark" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="flap-right-grad" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#1e1b4b" stop-opacity="0.9" />
       <stop offset="100%" stop-color="#0f172a" stop-opacity="0.95" />
     </linearGradient>
 
+    <!-- Mini Package Gradients -->
+    <linearGradient id="pkg-cyan-top" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8"/><stop offset="100%" stop-color="#00f2fe"/>
+    </linearGradient>
+    <linearGradient id="pkg-cyan-left" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0284c7"/><stop offset="100%" stop-color="#0369a1"/>
+    </linearGradient>
+    <linearGradient id="pkg-cyan-right" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0369a1"/><stop offset="100%" stop-color="#0c4a6e"/>
+    </linearGradient>
+
+    <linearGradient id="pkg-purple-top" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#c084fc"/><stop offset="100%" stop-color="#818cf8"/>
+    </linearGradient>
+    <linearGradient id="pkg-purple-left" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6366f1"/><stop offset="100%" stop-color="#4f46e5"/>
+    </linearGradient>
+    <linearGradient id="pkg-purple-right" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4f46e5"/><stop offset="100%" stop-color="#312e81"/>
+    </linearGradient>
+
+    <linearGradient id="pkg-emerald-top" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#34d399"/><stop offset="100%" stop-color="#10b981"/>
+    </linearGradient>
+    <linearGradient id="pkg-emerald-left" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#059669"/><stop offset="100%" stop-color="#047857"/>
+    </linearGradient>
+    <linearGradient id="pkg-emerald-right" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#047857"/><stop offset="100%" stop-color="#064e3b"/>
+    </linearGradient>
+
+    <!-- Clip Path for Packages into Box Opening -->
+    <clipPath id="cavity-clip">
+      <polygon points="20,-80 240,-80 240,87 198,87 130,128 62,87 20,87" />
+    </clipPath>
+
     <!-- Drop Filters -->
-    <filter id="soft-glow-dark" x="-25%" y="-25%" width="150%" height="150%">
-      <feGaussianBlur stdDeviation="6" result="blur" />
+    <filter id="soft-glow" x="-25%" y="-25%" width="150%" height="150%">
+      <feGaussianBlur stdDeviation="5" result="blur" />
       <feMerge>
         <feMergeNode in="blur" />
         <feMergeNode in="SourceGraphic" />
       </feMerge>
     </filter>
 
-    <filter id="ambient-ground-dark" x="-40%" y="-40%" width="180%" height="180%">
-      <feGaussianBlur stdDeviation="16" />
+    <filter id="ambient-ground" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="15" />
     </filter>
   </defs>
 
-  <!-- LEFT: ICON GROUP (Isometric Animated Box & Orbit) -->
+  <!-- ==================== LEFT: LOGO ICON ==================== -->
   <g transform="translate(10, 0)">
-    <!-- Ground Ambient Neon Light -->
-    <ellipse cx="130" cy="205" rx="85" ry="32" fill="#00f2fe" opacity="0.14" filter="url(#ambient-ground-dark)" />
-    <ellipse cx="150" cy="205" rx="75" ry="28" fill="#818cf8" opacity="0.12" filter="url(#ambient-ground-dark)" />
+    <!-- Ground Ambient Glow -->
+    <ellipse cx="130" cy="205" rx="80" ry="28" fill="#00f2fe" opacity="0.16" filter="url(#ambient-ground)" />
+    <ellipse cx="150" cy="205" rx="70" ry="24" fill="#818cf8" opacity="0.14" filter="url(#ambient-ground)" />
 
-    <!-- Orbital Caching Ring -->
-    <g class="orbital-ring" opacity="0.45">
-      <ellipse cx="130" cy="130" rx="108" ry="64" fill="none" stroke="url(#cyan-glow-dark)" stroke-width="1.6" stroke-dasharray="6 8" />
-      <circle cx="238" cy="130" r="4.5" fill="#00f2fe" filter="url(#soft-glow-dark)" />
-      <rect x="20" y="126" width="7" height="7" rx="1.5" fill="#818cf8" transform="rotate(45 23.5 129.5)" />
-    </g>
-
-    <!-- Floating Isometric Package -->
+    <!-- Floating Box with Descending Packages -->
     <g class="floating">
-      <!-- Cube Top Inner Cavity -->
-      <polygon points="130,46 198,87 130,128 62,87" fill="url(#box-top-inner-dark)" stroke="#1e293b" stroke-width="1.2" />
+      <!-- 1. Cube Top Inner Cavity -->
+      <polygon points="130,46 198,87 130,128 62,87" fill="url(#box-top-inner)" stroke="#1e293b" stroke-width="1.2" />
 
-      <!-- Left Flap (Open Folded Outwards) -->
-      <polygon points="62,87 130,128 100,74 28,34" fill="url(#flap-left-grad-dark)" stroke="#00f2fe" stroke-width="1.8" opacity="0.9" />
+      <!-- Inner cavity floor depth -->
+      <polygon points="130,76 172,102 130,128 88,102" fill="#020408" opacity="0.8" />
+      <line x1="130" y1="46" x2="130" y2="76" stroke="#1e293b" stroke-width="1" opacity="0.5"/>
 
-      <!-- Right Flap (Open Folded Outwards) -->
-      <polygon points="130,128 198,87 232,34 160,74" fill="url(#flap-right-grad-dark)" stroke="#818cf8" stroke-width="1.8" opacity="0.9" />
+      <!-- 2. Back Flaps (Open Folded Outwards) -->
+      <polygon points="62,87 130,128 100,74 28,34" fill="url(#flap-left-grad)" stroke="#00f2fe" stroke-width="1.8" opacity="0.9" />
+      <polygon points="130,128 198,87 232,34 160,74" fill="url(#flap-right-grad)" stroke="#818cf8" stroke-width="1.8" opacity="0.9" />
 
+      <!-- 3. Packages Descending Inside Box Opening -->
+      <g clip-path="url(#cavity-clip)">
+        <!-- Package 1: Center Cyan Box -->
+        <g class="package-drop-1" transform="translate(130, 68)">
+          <polygon points="0,-12 15,-3 0,6 -15,-3" fill="url(#pkg-cyan-top)" stroke="#00f2fe" stroke-width="0.8"/>
+          <polygon points="-15,-3 0,6 0,21 -15,12" fill="url(#pkg-cyan-left)"/>
+          <polygon points="0,6 15,-3 15,12 0,21" fill="url(#pkg-cyan-right)"/>
+          <line x1="0" y1="-3" x2="0" y2="12" stroke="rgba(255,255,255,0.6)" stroke-width="1.2"/>
+        </g>
+
+        <!-- Package 2: Left Purple Box -->
+        <g class="package-drop-2" transform="translate(104, 52)">
+          <polygon points="0,-10 12,-2 0,5 -12,-2" fill="url(#pkg-purple-top)" stroke="#818cf8" stroke-width="0.8"/>
+          <polygon points="-12,-2 0,5 0,17 -12,10" fill="url(#pkg-purple-left)"/>
+          <polygon points="0,5 12,-2 12,10 0,17" fill="url(#pkg-purple-right)"/>
+          <line x1="0" y1="5" x2="0" y2="17" stroke="rgba(255,255,255,0.5)" stroke-width="1"/>
+        </g>
+
+        <!-- Package 3: Right Emerald Box -->
+        <g class="package-drop-3" transform="translate(154, 58)">
+          <polygon points="0,-9 11,-2 0,5 -11,-2" fill="url(#pkg-emerald-top)" stroke="#34d399" stroke-width="0.8"/>
+          <polygon points="-11,-2 0,5 0,16 -11,9" fill="url(#pkg-emerald-left)"/>
+          <polygon points="0,5 11,-2 11,9 0,16" fill="url(#pkg-emerald-right)"/>
+          <line x1="0" y1="5" x2="0" y2="16" stroke="rgba(255,255,255,0.5)" stroke-width="1"/>
+        </g>
+      </g>
+
+      <!-- 4. Front Faces (Draws ON TOP of packages) -->
       <!-- Cube Left Face (Dark with Cyan Neon Edge) -->
-      <polygon points="62,87 130,128 130,214 62,173" fill="url(#box-left-face-dark)" stroke="#00f2fe" stroke-width="2.2" class="pulse-cyan" />
+      <polygon points="62,87 130,128 130,214 62,173" fill="url(#box-left-face)" stroke="#00f2fe" stroke-width="2.2" class="pulse-cyan" />
 
       <!-- Cube Right Face (Dark with Indigo Edge) -->
-      <polygon points="130,128 198,87 198,173 130,214" fill="url(#box-right-face-dark)" stroke="#818cf8" stroke-width="2.0" />
+      <polygon points="130,128 198,87 198,173 130,214" fill="url(#box-right-face)" stroke="#818cf8" stroke-width="2.0" />
 
       <!-- Center Seam Accent -->
       <line x1="130" y1="128" x2="130" y2="214" stroke="#00f2fe" stroke-width="1.5" opacity="0.6" />
 
-      <!-- Offline Wi-Fi Mark on Left Face (Isometric Projection) -->
+      <!-- 5. Single Offline Symbol on Left Face (Isometric Projection) -->
       <g transform="matrix(0.866, 0.5, 0, 1, 64, 88)">
+        <!-- Wi-Fi Dot & Arcs -->
         <circle cx="16" cy="65" r="3.5" fill="#00f2fe" class="wave-1" />
         <path d="M 16 48 A 17 17 0 0 1 33 65" fill="none" stroke="#00f2fe" stroke-width="3" stroke-linecap="round" class="wave-2" />
         <path d="M 16 31 A 34 34 0 0 1 50 65" fill="none" stroke="#00f2fe" stroke-width="3" stroke-linecap="round" class="wave-3" />
@@ -155,23 +223,23 @@
         </g>
       </g>
 
-      <!-- Circuit Traces / Fork Nodes on Right Face (Isometric Projection) -->
-      <g transform="matrix(0.866, -0.5, 0, 1, 130, 128)">
-        <path d="M 14,26 L 40,26 L 54,40" fill="none" stroke="#818cf8" stroke-width="2.2" stroke-linecap="round" opacity="0.85" />
-        <circle cx="54" cy="40" r="2.8" fill="#c084fc" />
-
-        <path d="M 18,54 L 44,54 L 58,42" fill="none" stroke="#818cf8" stroke-width="2.2" stroke-linecap="round" opacity="0.85" />
-        <circle cx="58" cy="42" r="2.8" fill="#c084fc" />
+      <!-- 6. Sleek Minimal Packaging Label on Right Face -->
+      <g transform="matrix(0.866, -0.5, 0, 1, 130, 128)" opacity="0.75">
+        <rect x="18" y="24" width="38" height="26" rx="4" fill="rgba(129, 140, 248, 0.08)" stroke="#818cf8" stroke-width="1.2"/>
+        <line x1="24" y1="32" x2="48" y2="32" stroke="#818cf8" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="24" y1="38" x2="42" y2="38" stroke="#818cf8" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="24" y1="44" x2="36" y2="44" stroke="#818cf8" stroke-width="1.5" stroke-linecap="round"/>
+        <circle cx="50" cy="42" r="2" fill="#818cf8"/>
       </g>
     </g>
   </g>
 
-  <!-- RIGHT: WORDMARK, BADGE & VALUE PROP -->
+  <!-- ==================== RIGHT: TYPOGRAPHY ==================== -->
   <g transform="translate(260, 42)">
-    <!-- Brand Name "offpkg" in Dark Mode: off (cyan) + pkg (pure white) -->
+    <!-- Brand Name "offpkg" with Dual-Theme Visibility -->
     <text x="0" y="74" font-size="76" font-weight="900" letter-spacing="-2">
-      <tspan fill="url(#cyan-glow-dark)" filter="url(#soft-glow-dark)">off</tspan>
-      <tspan fill="#f8fafc">pkg</tspan>
+      <tspan fill="url(#cyan-glow)" filter="url(#soft-glow)">off</tspan>
+      <tspan class="pkg-word" fill="#f8fafc">pkg</tspan>
     </text>
 
     <!-- Version Badge Inline -->
@@ -179,12 +247,12 @@
     <text x="288" y="40" font-size="11" font-weight="700" fill="#00f2fe" text-anchor="middle" class="mono">v0.1.7</text>
 
     <!-- Subtitle / Tagline -->
-    <text x="0" y="114" font-size="13.5" font-weight="700" letter-spacing="3.2" fill="#94a3b8" class="mono">
+    <text class="tagline-text" fill="#94a3b8" x="0" y="114" font-size="13.5" font-weight="700" letter-spacing="3.2" class="mono">
       UNIVERSAL OFFLINE PACKAGE MANAGER
     </text>
 
     <!-- Secondary Value Statement -->
-    <text x="0" y="142" font-size="14.5" font-weight="600" fill="#cbd5e1">
+    <text class="sub-text" fill="#cbd5e1" x="0" y="142" font-size="14.5" font-weight="600">
       Cache once online. Build, link &amp; scaffold full projects offline forever.
     </text>
 
@@ -192,37 +260,37 @@
     <g transform="translate(0, 168)">
       <!-- Rust Pill -->
       <g>
-        <rect x="0" y="0" width="86" height="26" rx="6" fill="#1e293b" stroke="rgba(255,255,255,0.12)" stroke-width="1" />
+        <rect class="pill-bg pill-border" fill="#1e293b" stroke="rgba(255, 255, 255, 0.12)" stroke-width="1" x="0" y="0" width="86" height="26" rx="6" />
         <circle cx="12" cy="13" r="3.5" fill="#e05d44" />
-        <text x="24" y="17" font-size="11" font-weight="600" fill="#f8fafc" class="mono">Rust</text>
+        <text class="pill-text mono" fill="#f8fafc" x="24" y="17" font-size="11" font-weight="600">Rust</text>
       </g>
 
       <!-- Bun Pill -->
       <g transform="translate(94, 0)">
-        <rect x="0" y="0" width="84" height="26" rx="6" fill="#1e293b" stroke="rgba(255,255,255,0.12)" stroke-width="1" />
+        <rect class="pill-bg pill-border" fill="#1e293b" stroke="rgba(255, 255, 255, 0.12)" stroke-width="1" x="0" y="0" width="84" height="26" rx="6" />
         <circle cx="12" cy="13" r="3.5" fill="#fb923c" />
-        <text x="24" y="17" font-size="11" font-weight="600" fill="#f8fafc" class="mono">Bun</text>
+        <text class="pill-text mono" fill="#f8fafc" x="24" y="17" font-size="11" font-weight="600">Bun</text>
       </g>
 
       <!-- uv Pill -->
       <g transform="translate(186, 0)">
-        <rect x="0" y="0" width="76" height="26" rx="6" fill="#1e293b" stroke="rgba(255,255,255,0.12)" stroke-width="1" />
+        <rect class="pill-bg pill-border" fill="#1e293b" stroke="rgba(255, 255, 255, 0.12)" stroke-width="1" x="0" y="0" width="76" height="26" rx="6" />
         <circle cx="12" cy="13" r="3.5" fill="#a855f7" />
-        <text x="24" y="17" font-size="11" font-weight="600" fill="#f8fafc" class="mono">uv</text>
+        <text class="pill-text mono" fill="#f8fafc" x="24" y="17" font-size="11" font-weight="600">uv</text>
       </g>
 
       <!-- Flutter Pill -->
       <g transform="translate(270, 0)">
-        <rect x="0" y="0" width="102" height="26" rx="6" fill="#1e293b" stroke="rgba(255,255,255,0.12)" stroke-width="1" />
+        <rect class="pill-bg pill-border" fill="#1e293b" stroke="rgba(255, 255, 255, 0.12)" stroke-width="1" x="0" y="0" width="102" height="26" rx="6" />
         <circle cx="12" cy="13" r="3.5" fill="#38bdf8" />
-        <text x="24" y="17" font-size="11" font-weight="600" fill="#f8fafc" class="mono">Flutter</text>
+        <text class="pill-text mono" fill="#f8fafc" x="24" y="17" font-size="11" font-weight="600">Flutter</text>
       </g>
 
       <!-- SQLite Pill -->
       <g transform="translate(380, 0)">
-        <rect x="0" y="0" width="98" height="26" rx="6" fill="#1e293b" stroke="rgba(255,255,255,0.12)" stroke-width="1" />
+        <rect class="pill-bg pill-border" fill="#1e293b" stroke="rgba(255, 255, 255, 0.12)" stroke-width="1" x="0" y="0" width="98" height="26" rx="6" />
         <circle cx="12" cy="13" r="3.5" fill="#10b981" />
-        <text x="24" y="17" font-size="11" font-weight="600" fill="#f8fafc" class="mono">SQLite</text>
+        <text class="pill-text mono" fill="#f8fafc" x="24" y="17" font-size="11" font-weight="600">SQLite</text>
       </g>
     </g>
   </g>
