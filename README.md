@@ -52,11 +52,10 @@ Cache packages once from **npm (Bun)**, **PyPI (uv)**, and **pub.dev (Flutter)**
 
 ## How It Works 🔄
 
-> 🎬 **Watch the 30-Second Overview:** [High-Quality Explanatory Video (`assets/how-it-works.mp4`)](assets/how-it-works.mp4)
+> 🎬 **Watch the 30-Second Overview:** Play the Full HD video directly below or download [`assets/how-it-works.mp4`](assets/how-it-works.mp4).
 
 <p align="center">
-  <video src="https://raw.githubusercontent.com/aswin402/offpkg/main/assets/how-it-works.mp4" controls="controls" width="100%" style="max-width: 900px; border-radius: 12px; box-shadow: 0 20px 50px rgba(0,0,0,0.5);">
-    <a href="assets/how-it-works.mp4">▶ Play Video: How offpkg Works (1080p Full HD)</a>
+  <video src="https://github.com/user-attachments/assets/3c4c9409-78d5-41b9-9597-4fd9348357b0" controls="controls" width="100%" style="max-width: 900px; border-radius: 12px; box-shadow: 0 20px 50px rgba(0,0,0,0.5);">
   </video>
 </p>
 
