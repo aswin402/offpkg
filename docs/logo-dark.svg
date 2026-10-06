@@ -11,66 +11,7 @@
         font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
       }
 
-      /* CSS Theme Variables with Light/Dark Support */
-      :root {
-        --pkg-color: #f8fafc;
-        --tagline-color: #94a3b8;
-        --sub-color: #cbd5e1;
-        --pill-bg: #1e293b;
-        --pill-text: #f8fafc;
-        --pill-border: rgba(255, 255, 255, 0.12);
-        --box-bg-lightness: 1;
-      }
-
-      @media (prefers-color-scheme: light) {
-        :root {
-          --pkg-color: #090d16;
-          --tagline-color: #475569;
-          --sub-color: #1e293b;
-          --pill-bg: #f1f5f9;
-          --pill-text: #090d16;
-          --pill-border: #cbd5e1;
-        }
-        .pkg-text {
-          fill: #090d16 !important;
-        }
-        .tagline-text {
-          fill: #475569 !important;
-        }
-        .sub-text {
-          fill: #1e293b !important;
-        }
-        .pill-bg {
-          fill: #f1f5f9 !important;
-        }
-        .pill-text {
-          fill: #090d16 !important;
-        }
-        .pill-border {
-          stroke: #cbd5e1 !important;
-        }
-      }
-
-      .pkg-text {
-        fill: var(--pkg-color, #f8fafc);
-      }
-      .tagline-text {
-        fill: var(--tagline-color, #94a3b8);
-      }
-      .sub-text {
-        fill: var(--sub-color, #cbd5e1);
-      }
-      .pill-bg {
-        fill: var(--pill-bg, #1e293b);
-      }
-      .pill-text {
-        fill: var(--pill-text, #f8fafc);
-      }
-      .pill-border {
-        stroke: var(--pill-border, rgba(255, 255, 255, 0.12));
-      }
-
-      /* Smooth Floating Animation */
+      /* Floating Animation */
       @keyframes float {
         0%, 100% { transform: translateY(0px); }
         50% { transform: translateY(-7px); }
@@ -119,43 +60,43 @@
     </style>
 
     <!-- Gradients -->
-    <linearGradient id="cyan-glow" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="cyan-glow-dark" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#00f2fe" />
       <stop offset="100%" stop-color="#38bdf8" />
     </linearGradient>
 
-    <linearGradient id="purple-glow" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="purple-glow-dark" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#818cf8" />
       <stop offset="100%" stop-color="#c084fc" />
     </linearGradient>
 
-    <linearGradient id="box-top-inner" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="box-top-inner-dark" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#0f172a" />
       <stop offset="100%" stop-color="#020617" />
     </linearGradient>
 
-    <linearGradient id="box-left-face" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="box-left-face-dark" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#0c1222" />
       <stop offset="100%" stop-color="#040711" />
     </linearGradient>
 
-    <linearGradient id="box-right-face" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="box-right-face-dark" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#111827" />
       <stop offset="100%" stop-color="#030712" />
     </linearGradient>
 
-    <linearGradient id="flap-left-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="flap-left-grad-dark" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#1e293b" stop-opacity="0.9" />
       <stop offset="100%" stop-color="#0f172a" stop-opacity="0.95" />
     </linearGradient>
 
-    <linearGradient id="flap-right-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="flap-right-grad-dark" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#1e1b4b" stop-opacity="0.9" />
       <stop offset="100%" stop-color="#0f172a" stop-opacity="0.95" />
     </linearGradient>
 
     <!-- Drop Filters -->
-    <filter id="soft-glow" x="-25%" y="-25%" width="150%" height="150%">
+    <filter id="soft-glow-dark" x="-25%" y="-25%" width="150%" height="150%">
       <feGaussianBlur stdDeviation="6" result="blur" />
       <feMerge>
         <feMergeNode in="blur" />
@@ -163,7 +104,7 @@
       </feMerge>
     </filter>
 
-    <filter id="ambient-ground" x="-40%" y="-40%" width="180%" height="180%">
+    <filter id="ambient-ground-dark" x="-40%" y="-40%" width="180%" height="180%">
       <feGaussianBlur stdDeviation="16" />
     </filter>
   </defs>
@@ -171,39 +112,38 @@
   <!-- LEFT: ICON GROUP (Isometric Animated Box & Orbit) -->
   <g transform="translate(10, 0)">
     <!-- Ground Ambient Neon Light -->
-    <ellipse cx="130" cy="205" rx="85" ry="32" fill="#00f2fe" opacity="0.14" filter="url(#ambient-ground)" />
-    <ellipse cx="150" cy="205" rx="75" ry="28" fill="#818cf8" opacity="0.12" filter="url(#ambient-ground)" />
+    <ellipse cx="130" cy="205" rx="85" ry="32" fill="#00f2fe" opacity="0.14" filter="url(#ambient-ground-dark)" />
+    <ellipse cx="150" cy="205" rx="75" ry="28" fill="#818cf8" opacity="0.12" filter="url(#ambient-ground-dark)" />
 
     <!-- Orbital Caching Ring -->
     <g class="orbital-ring" opacity="0.45">
-      <ellipse cx="130" cy="130" rx="108" ry="64" fill="none" stroke="url(#cyan-glow)" stroke-width="1.6" stroke-dasharray="6 8" />
-      <circle cx="238" cy="130" r="4.5" fill="#00f2fe" filter="url(#soft-glow)" />
+      <ellipse cx="130" cy="130" rx="108" ry="64" fill="none" stroke="url(#cyan-glow-dark)" stroke-width="1.6" stroke-dasharray="6 8" />
+      <circle cx="238" cy="130" r="4.5" fill="#00f2fe" filter="url(#soft-glow-dark)" />
       <rect x="20" y="126" width="7" height="7" rx="1.5" fill="#818cf8" transform="rotate(45 23.5 129.5)" />
     </g>
 
     <!-- Floating Isometric Package -->
     <g class="floating">
       <!-- Cube Top Inner Cavity -->
-      <polygon points="130,46 198,87 130,128 62,87" fill="url(#box-top-inner)" stroke="#1e293b" stroke-width="1.2" />
+      <polygon points="130,46 198,87 130,128 62,87" fill="url(#box-top-inner-dark)" stroke="#1e293b" stroke-width="1.2" />
 
       <!-- Left Flap (Open Folded Outwards) -->
-      <polygon points="62,87 130,128 100,74 28,34" fill="url(#flap-left-grad)" stroke="#00f2fe" stroke-width="1.8" opacity="0.9" />
+      <polygon points="62,87 130,128 100,74 28,34" fill="url(#flap-left-grad-dark)" stroke="#00f2fe" stroke-width="1.8" opacity="0.9" />
 
       <!-- Right Flap (Open Folded Outwards) -->
-      <polygon points="130,128 198,87 232,34 160,74" fill="url(#flap-right-grad)" stroke="#818cf8" stroke-width="1.8" opacity="0.9" />
+      <polygon points="130,128 198,87 232,34 160,74" fill="url(#flap-right-grad-dark)" stroke="#818cf8" stroke-width="1.8" opacity="0.9" />
 
       <!-- Cube Left Face (Dark with Cyan Neon Edge) -->
-      <polygon points="62,87 130,128 130,214 62,173" fill="url(#box-left-face)" stroke="#00f2fe" stroke-width="2.2" class="pulse-cyan" />
+      <polygon points="62,87 130,128 130,214 62,173" fill="url(#box-left-face-dark)" stroke="#00f2fe" stroke-width="2.2" class="pulse-cyan" />
 
       <!-- Cube Right Face (Dark with Indigo Edge) -->
-      <polygon points="130,128 198,87 198,173 130,214" fill="url(#box-right-face)" stroke="#818cf8" stroke-width="2.0" />
+      <polygon points="130,128 198,87 198,173 130,214" fill="url(#box-right-face-dark)" stroke="#818cf8" stroke-width="2.0" />
 
       <!-- Center Seam Accent -->
       <line x1="130" y1="128" x2="130" y2="214" stroke="#00f2fe" stroke-width="1.5" opacity="0.6" />
 
       <!-- Offline Wi-Fi Mark on Left Face (Isometric Projection) -->
       <g transform="matrix(0.866, 0.5, 0, 1, 64, 88)">
-        <!-- Wi-Fi Dot & Arcs -->
         <circle cx="16" cy="65" r="3.5" fill="#00f2fe" class="wave-1" />
         <path d="M 16 48 A 17 17 0 0 1 33 65" fill="none" stroke="#00f2fe" stroke-width="3" stroke-linecap="round" class="wave-2" />
         <path d="M 16 31 A 34 34 0 0 1 50 65" fill="none" stroke="#00f2fe" stroke-width="3" stroke-linecap="round" class="wave-3" />
@@ -228,23 +168,23 @@
 
   <!-- RIGHT: WORDMARK, BADGE & VALUE PROP -->
   <g transform="translate(260, 42)">
-    <!-- Brand Name "offpkg" with Dual-Theme Visibility -->
+    <!-- Brand Name "offpkg" in Dark Mode: off (cyan) + pkg (pure white) -->
     <text x="0" y="74" font-size="76" font-weight="900" letter-spacing="-2">
-      <tspan fill="url(#cyan-glow)" filter="url(#soft-glow)">off</tspan>
-      <tspan class="pkg-text">pkg</tspan>
+      <tspan fill="url(#cyan-glow-dark)" filter="url(#soft-glow-dark)">off</tspan>
+      <tspan fill="#f8fafc">pkg</tspan>
     </text>
 
     <!-- Version Badge Inline -->
     <rect x="256" y="24" width="64" height="24" rx="12" fill="#00f2fe" fill-opacity="0.12" stroke="#00f2fe" stroke-width="1.4" />
     <text x="288" y="40" font-size="11" font-weight="700" fill="#00f2fe" text-anchor="middle" class="mono">v0.1.7</text>
 
-    <!-- Subtitle / Tagline with Theme Adaptation -->
-    <text x="0" y="114" font-size="13.5" font-weight="700" letter-spacing="3.2" class="mono tagline-text">
+    <!-- Subtitle / Tagline -->
+    <text x="0" y="114" font-size="13.5" font-weight="700" letter-spacing="3.2" fill="#94a3b8" class="mono">
       UNIVERSAL OFFLINE PACKAGE MANAGER
     </text>
 
     <!-- Secondary Value Statement -->
-    <text x="0" y="142" font-size="14.5" font-weight="600" class="sub-text">
+    <text x="0" y="142" font-size="14.5" font-weight="600" fill="#cbd5e1">
       Cache once online. Build, link &amp; scaffold full projects offline forever.
     </text>
 
@@ -252,37 +192,37 @@
     <g transform="translate(0, 168)">
       <!-- Rust Pill -->
       <g>
-        <rect x="0" y="0" width="86" height="26" rx="6" class="pill-bg pill-border" stroke-width="1" />
+        <rect x="0" y="0" width="86" height="26" rx="6" fill="#1e293b" stroke="rgba(255,255,255,0.12)" stroke-width="1" />
         <circle cx="12" cy="13" r="3.5" fill="#e05d44" />
-        <text x="24" y="17" font-size="11" font-weight="600" class="mono pill-text">Rust</text>
+        <text x="24" y="17" font-size="11" font-weight="600" fill="#f8fafc" class="mono">Rust</text>
       </g>
 
       <!-- Bun Pill -->
       <g transform="translate(94, 0)">
-        <rect x="0" y="0" width="84" height="26" rx="6" class="pill-bg pill-border" stroke-width="1" />
+        <rect x="0" y="0" width="84" height="26" rx="6" fill="#1e293b" stroke="rgba(255,255,255,0.12)" stroke-width="1" />
         <circle cx="12" cy="13" r="3.5" fill="#fb923c" />
-        <text x="24" y="17" font-size="11" font-weight="600" class="mono pill-text">Bun</text>
+        <text x="24" y="17" font-size="11" font-weight="600" fill="#f8fafc" class="mono">Bun</text>
       </g>
 
       <!-- uv Pill -->
       <g transform="translate(186, 0)">
-        <rect x="0" y="0" width="76" height="26" rx="6" class="pill-bg pill-border" stroke-width="1" />
+        <rect x="0" y="0" width="76" height="26" rx="6" fill="#1e293b" stroke="rgba(255,255,255,0.12)" stroke-width="1" />
         <circle cx="12" cy="13" r="3.5" fill="#a855f7" />
-        <text x="24" y="17" font-size="11" font-weight="600" class="mono pill-text">uv</text>
+        <text x="24" y="17" font-size="11" font-weight="600" fill="#f8fafc" class="mono">uv</text>
       </g>
 
       <!-- Flutter Pill -->
       <g transform="translate(270, 0)">
-        <rect x="0" y="0" width="102" height="26" rx="6" class="pill-bg pill-border" stroke-width="1" />
+        <rect x="0" y="0" width="102" height="26" rx="6" fill="#1e293b" stroke="rgba(255,255,255,0.12)" stroke-width="1" />
         <circle cx="12" cy="13" r="3.5" fill="#38bdf8" />
-        <text x="24" y="17" font-size="11" font-weight="600" class="mono pill-text">Flutter</text>
+        <text x="24" y="17" font-size="11" font-weight="600" fill="#f8fafc" class="mono">Flutter</text>
       </g>
 
       <!-- SQLite Pill -->
       <g transform="translate(380, 0)">
-        <rect x="0" y="0" width="98" height="26" rx="6" class="pill-bg pill-border" stroke-width="1" />
+        <rect x="0" y="0" width="98" height="26" rx="6" fill="#1e293b" stroke="rgba(255,255,255,0.12)" stroke-width="1" />
         <circle cx="12" cy="13" r="3.5" fill="#10b981" />
-        <text x="24" y="17" font-size="11" font-weight="600" class="mono pill-text">SQLite</text>
+        <text x="24" y="17" font-size="11" font-weight="600" fill="#f8fafc" class="mono">SQLite</text>
       </g>
     </g>
   </g>

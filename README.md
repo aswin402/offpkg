@@ -1,6 +1,10 @@
 <p align="center">
   <a href="https://github.com/aswin402/offpkg">
-    <img src="docs/logo.svg" alt="offpkg - Universal Offline Package Manager" width="100%" />
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="docs/logo-dark.svg">
+      <source media="(prefers-color-scheme: light)" srcset="docs/logo-light.svg">
+      <img src="docs/logo.svg" alt="offpkg - Universal Offline Package Manager" width="100%" />
+    </picture>
   </a>
 </p>
 

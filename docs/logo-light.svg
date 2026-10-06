@@ -1,0 +1,229 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 260" width="100%" height="100%">
+  <defs>
+    <!-- Fonts & Animations -->
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800;900&amp;family=JetBrains+Mono:wght@500;600;700&amp;display=swap');
+
+      text {
+        font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      }
+      .mono {
+        font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      }
+
+      /* Floating Animation */
+      @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-7px); }
+      }
+      .floating {
+        animation: float 4.5s ease-in-out infinite;
+        transform-origin: 130px 130px;
+      }
+
+      /* Cyan Glow Pulse */
+      @keyframes neon-pulse-light {
+        0%, 100% { opacity: 0.9; filter: drop-shadow(0 0 4px #0284c7); }
+        50% { opacity: 1.0; filter: drop-shadow(0 0 10px #0284c7); }
+      }
+      .pulse-cyan {
+        animation: neon-pulse-light 3.2s ease-in-out infinite;
+      }
+
+      /* Orbital Rotation */
+      @keyframes orbit {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
+      .orbital-ring {
+        transform-origin: 130px 130px;
+        animation: orbit 22s linear infinite;
+      }
+
+      /* Wi-Fi Waves Sequential Pulse */
+      @keyframes wave-pulse {
+        0%, 100% { opacity: 0.35; }
+        50% { opacity: 1.0; }
+      }
+      .wave-1 { animation: wave-pulse 2.2s ease-in-out infinite; }
+      .wave-2 { animation: wave-pulse 2.2s ease-in-out infinite 0.35s; }
+      .wave-3 { animation: wave-pulse 2.2s ease-in-out infinite 0.7s; }
+
+      /* Laser Slash Pulse */
+      @keyframes laser {
+        0%, 100% { filter: drop-shadow(0 0 4px #ef4444); opacity: 0.95; }
+        50% { filter: drop-shadow(0 0 8px #ef4444); opacity: 1; }
+      }
+      .laser-slash {
+        animation: laser 2.8s ease-in-out infinite;
+      }
+    </style>
+
+    <!-- Gradients -->
+    <linearGradient id="cyan-glow-light" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0284c7" />
+      <stop offset="100%" stop-color="#06b6d4" />
+    </linearGradient>
+
+    <linearGradient id="purple-glow-light" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6366f1" />
+      <stop offset="100%" stop-color="#8b5cf6" />
+    </linearGradient>
+
+    <linearGradient id="box-top-inner-light" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b" />
+      <stop offset="100%" stop-color="#0f172a" />
+    </linearGradient>
+
+    <linearGradient id="box-left-face-light" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b" />
+      <stop offset="100%" stop-color="#0f172a" />
+    </linearGradient>
+
+    <linearGradient id="box-right-face-light" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#334155" />
+      <stop offset="100%" stop-color="#1e293b" />
+    </linearGradient>
+
+    <linearGradient id="flap-left-grad-light" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#334155" stop-opacity="0.95" />
+      <stop offset="100%" stop-color="#1e293b" stop-opacity="0.95" />
+    </linearGradient>
+
+    <linearGradient id="flap-right-grad-light" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#475569" stop-opacity="0.95" />
+      <stop offset="100%" stop-color="#1e293b" stop-opacity="0.95" />
+    </linearGradient>
+
+    <!-- Drop Filters -->
+    <filter id="soft-glow-light" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+
+    <filter id="ambient-ground-light" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="14" />
+    </filter>
+  </defs>
+
+  <!-- LEFT: ICON GROUP (Isometric Animated Box & Orbit) -->
+  <g transform="translate(10, 0)">
+    <!-- Ground Ambient Shadow for Light Backgrounds -->
+    <ellipse cx="130" cy="205" rx="85" ry="28" fill="#0284c7" opacity="0.16" filter="url(#ambient-ground-light)" />
+    <ellipse cx="150" cy="205" rx="75" ry="24" fill="#6366f1" opacity="0.12" filter="url(#ambient-ground-light)" />
+
+    <!-- Orbital Caching Ring -->
+    <g class="orbital-ring" opacity="0.55">
+      <ellipse cx="130" cy="130" rx="108" ry="64" fill="none" stroke="url(#cyan-glow-light)" stroke-width="1.8" stroke-dasharray="6 8" />
+      <circle cx="238" cy="130" r="4.5" fill="#0284c7" filter="url(#soft-glow-light)" />
+      <rect x="20" y="126" width="7" height="7" rx="1.5" fill="#6366f1" transform="rotate(45 23.5 129.5)" />
+    </g>
+
+    <!-- Floating Isometric Package -->
+    <g class="floating">
+      <!-- Cube Top Inner Cavity -->
+      <polygon points="130,46 198,87 130,128 62,87" fill="url(#box-top-inner-light)" stroke="#475569" stroke-width="1.2" />
+
+      <!-- Left Flap (Open Folded Outwards) -->
+      <polygon points="62,87 130,128 100,74 28,34" fill="url(#flap-left-grad-light)" stroke="#0284c7" stroke-width="1.8" />
+
+      <!-- Right Flap (Open Folded Outwards) -->
+      <polygon points="130,128 198,87 232,34 160,74" fill="url(#flap-right-grad-light)" stroke="#6366f1" stroke-width="1.8" />
+
+      <!-- Cube Left Face (Crisp Dark Slate with Cyan Edge) -->
+      <polygon points="62,87 130,128 130,214 62,173" fill="url(#box-left-face-light)" stroke="#0284c7" stroke-width="2.2" class="pulse-cyan" />
+
+      <!-- Cube Right Face (Dark Slate with Indigo Edge) -->
+      <polygon points="130,128 198,87 198,173 130,214" fill="url(#box-right-face-light)" stroke="#6366f1" stroke-width="2.0" />
+
+      <!-- Center Seam Accent -->
+      <line x1="130" y1="128" x2="130" y2="214" stroke="#0284c7" stroke-width="1.5" opacity="0.7" />
+
+      <!-- Offline Wi-Fi Mark on Left Face (Isometric Projection) -->
+      <g transform="matrix(0.866, 0.5, 0, 1, 64, 88)">
+        <circle cx="16" cy="65" r="3.5" fill="#00f2fe" class="wave-1" />
+        <path d="M 16 48 A 17 17 0 0 1 33 65" fill="none" stroke="#00f2fe" stroke-width="3" stroke-linecap="round" class="wave-2" />
+        <path d="M 16 31 A 34 34 0 0 1 50 65" fill="none" stroke="#00f2fe" stroke-width="3" stroke-linecap="round" class="wave-3" />
+
+        <!-- Red Offline Slash (Laser Beam) -->
+        <g class="laser-slash">
+          <line x1="6" y1="72" x2="58" y2="14" stroke="#ef4444" stroke-width="5" stroke-linecap="round" />
+          <line x1="6" y1="72" x2="58" y2="14" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity="0.95" />
+        </g>
+      </g>
+
+      <!-- Circuit Traces / Fork Nodes on Right Face (Isometric Projection) -->
+      <g transform="matrix(0.866, -0.5, 0, 1, 130, 128)">
+        <path d="M 14,26 L 40,26 L 54,40" fill="none" stroke="#a5b4fc" stroke-width="2.2" stroke-linecap="round" opacity="0.9" />
+        <circle cx="54" cy="40" r="2.8" fill="#c084fc" />
+
+        <path d="M 18,54 L 44,54 L 58,42" fill="none" stroke="#a5b4fc" stroke-width="2.2" stroke-linecap="round" opacity="0.9" />
+        <circle cx="58" cy="42" r="2.8" fill="#c084fc" />
+      </g>
+    </g>
+  </g>
+
+  <!-- RIGHT: WORDMARK, BADGE & VALUE PROP -->
+  <g transform="translate(260, 42)">
+    <!-- Brand Name "offpkg" in Light Mode: off (cyan) + pkg (deep obsidian #090d16) -->
+    <text x="0" y="74" font-size="76" font-weight="900" letter-spacing="-2">
+      <tspan fill="url(#cyan-glow-light)">off</tspan>
+      <tspan fill="#090d16">pkg</tspan>
+    </text>
+
+    <!-- Version Badge Inline -->
+    <rect x="256" y="24" width="64" height="24" rx="12" fill="#0284c7" fill-opacity="0.1" stroke="#0284c7" stroke-width="1.4" />
+    <text x="288" y="40" font-size="11" font-weight="700" fill="#0284c7" text-anchor="middle" class="mono">v0.1.7</text>
+
+    <!-- Subtitle / Tagline -->
+    <text x="0" y="114" font-size="13.5" font-weight="700" letter-spacing="3.2" fill="#475569" class="mono">
+      UNIVERSAL OFFLINE PACKAGE MANAGER
+    </text>
+
+    <!-- Secondary Value Statement -->
+    <text x="0" y="142" font-size="14.5" font-weight="600" fill="#1e293b">
+      Cache once online. Build, link &amp; scaffold full projects offline forever.
+    </text>
+
+    <!-- Tech Stack Pill Badges with Light Backgrounds -->
+    <g transform="translate(0, 168)">
+      <!-- Rust Pill -->
+      <g>
+        <rect x="0" y="0" width="86" height="26" rx="6" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
+        <circle cx="12" cy="13" r="3.5" fill="#ea580c" />
+        <text x="24" y="17" font-size="11" font-weight="600" fill="#0f172a" class="mono">Rust</text>
+      </g>
+
+      <!-- Bun Pill -->
+      <g transform="translate(94, 0)">
+        <rect x="0" y="0" width="84" height="26" rx="6" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
+        <circle cx="12" cy="13" r="3.5" fill="#f97316" />
+        <text x="24" y="17" font-size="11" font-weight="600" fill="#0f172a" class="mono">Bun</text>
+      </g>
+
+      <!-- uv Pill -->
+      <g transform="translate(186, 0)">
+        <rect x="0" y="0" width="76" height="26" rx="6" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
+        <circle cx="12" cy="13" r="3.5" fill="#9333ea" />
+        <text x="24" y="17" font-size="11" font-weight="600" fill="#0f172a" class="mono">uv</text>
+      </g>
+
+      <!-- Flutter Pill -->
+      <g transform="translate(270, 0)">
+        <rect x="0" y="0" width="102" height="26" rx="6" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
+        <circle cx="12" cy="13" r="3.5" fill="#0284c7" />
+        <text x="24" y="17" font-size="11" font-weight="600" fill="#0f172a" class="mono">Flutter</text>
+      </g>
+
+      <!-- SQLite Pill -->
+      <g transform="translate(380, 0)">
+        <rect x="0" y="0" width="98" height="26" rx="6" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" />
+        <circle cx="12" cy="13" r="3.5" fill="#059669" />
+        <text x="24" y="17" font-size="11" font-weight="600" fill="#0f172a" class="mono">SQLite</text>
+      </g>
+    </g>
+  </g>
+</svg>
