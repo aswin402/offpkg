@@ -66,10 +66,11 @@ Cache packages once from **npm (Bun)**, **PyPI (uv)**, and **pub.dev (Flutter)**
 ```
 ONLINE (Run Once):                                  OFFLINE (Forever):
 ─────────────────────────────────────────────       ──────────────────────────────────────────────
-$ offpkg bun install react                   →      $ offpkg bun add react          (Project A)
-$ offpkg uv install fastapi                  →      $ offpkg uv add fastapi         (Project B)
-$ offpkg flutter install dio                 →      $ offpkg flutter add dio        (Project C)
+$ offpkg bun install react@19.2.4            →      $ offpkg bun add react          (Project A)
+$ offpkg uv install requests==2.31.0         →      $ offpkg uv add requests        (Project B)
+$ offpkg flutter install dio:^5.4.0          →      $ offpkg flutter add dio        (Project C)
 $ offpkg stack install react-vite            →      $ offpkg stack add react-vite   (Zero network)
+$ offpkg stack save my-starter-app           →      $ offpkg stack add my-starter-app
 $ offpkg docs edit react                     →      $ (Auto-copied to offpkg_docs/ in every repo)
 ```
 
@@ -200,9 +201,12 @@ If your installation is already current:
 ## Core Features ✨
 
 - **📦 Multi-Runtime Support**: Unifies package caching for Bun (`npm`), Python (`uv`/`PyPI`), and Flutter (`pub.dev`).
+- **🎯 Smart Version Pinning & Semver**: Install exact versions or ranges (`react@18.2.0`, `requests==2.31.0`, `dio:^5.4.0`) with intelligent cache resolution.
 - **🔒 Cryptographic Integrity**: Verifies SHA-256 hashes on all cached `.tgz`, `.whl`, and `.tar.gz` archives in `~/.offpkg/cache/`.
 - **🗃️ SQLite Database Manifest**: Embedded `offpkg.db` catalog with automated schema migrations, unique constraints, and instant queries.
 - **🏗️ Fullstack Stacks Engine**: Scaffolds full multi-file architectures in under a second (configs, source files, and dependencies) completely offline.
+- **📁 Directory Template Engine & Export**: Turn any project into a reusable offline template with `offpkg stack save <name>` or organize folders in `~/.offpkg/templates/`.
+- **🌐 Configurable Registries**: Direct downloads through official registries, corporate proxies, or private enterprise mirrors (npm, PyPI, pub.dev).
 - **📝 Global Offline Documentation**: Edit package READMEs once with `offpkg docs edit`, and have your custom notes automatically synchronized to `offpkg_docs/` in every new project folder.
 - **🩺 Interactive Terminal UI & Doctor**: ANSI progress bars, animated braille spinners, and `offpkg doctor` to verify environment toolchains.
 - **🧹 Disk Reclamation**: `remove <pkg>` clears cached archives and database records while reporting freed disk space.
@@ -211,46 +215,66 @@ If your installation is already current:
 
 ## CLI Reference 🛠️
 
-### Per-Runtime Package Commands
+### Per-Runtime Package Commands & Version Pinning
 
 ```bash
-# Cache a package globally (Online once)
-offpkg bun install <pkg>
-offpkg uv install <pkg>
-offpkg flutter install <pkg>
+# Cache latest version globally (Online once)
+offpkg bun install react
+offpkg uv install fastapi
+offpkg flutter install dio
+
+# Cache specific versions or semver ranges
+offpkg bun install react@18.2.0
+offpkg bun install @types/react@^18.0.0
+offpkg uv install requests==2.31.0
+offpkg uv install "fastapi>=0.110.0"
+offpkg flutter install dio:^5.4.0
+offpkg flutter install provider@6.1.1
 
 # Add cached package to current project (Offline forever)
-offpkg bun add <pkg>
-offpkg uv add <pkg>
-offpkg flutter add <pkg>
+offpkg bun add react
+offpkg bun add react@18.2.0
+offpkg uv add requests
+offpkg flutter add dio
 
 # Bulk-cache all dependencies declared in project files
 offpkg uv install-all        # parses pyproject.toml
 offpkg flutter install-all   # parses pubspec.yaml
 
 # Remove a package from global cache
-offpkg bun remove <pkg>
-offpkg uv remove <pkg>
-offpkg flutter remove <pkg>
+offpkg bun remove react
+offpkg uv remove requests
+offpkg flutter remove dio
 ```
 
-### Fullstack Stack Commands
+### Fullstack Stack & Template Commands
 
 ```bash
-# Cache all packages in a template globally
-offpkg stack install react-vite
-
-# Scaffold full stack into current directory (Fully offline)
-offpkg stack add react-vite
-
-# List all available built-in stacks
+# List all available built-in and custom stacks
 offpkg stack list
 
 # Inspect what a stack contains (files, packages, configs)
 offpkg stack show react-vite
 
-# Create a custom TOML stack template interactively
-offpkg stack new my-stack --runtime bun
+# Cache all packages in a stack globally (Online once)
+offpkg stack install react-vite
+
+# Scaffold full stack into current directory (Fully offline)
+offpkg stack add react-vite
+
+# Save current project as a reusable directory template
+offpkg stack save my-custom-app
+offpkg stack export my-custom-app   # alias
+
+# Inspect template directory storage paths
+offpkg stack path                   # prints templates & stacks directory
+offpkg stack path my-custom-app     # prints path to specific template
+
+# Delete a custom stack or template
+offpkg stack delete my-custom-app
+
+# Create a custom TOML stack interactively
+offpkg stack new my-stack
 ```
 
 ### Global Documentation Engine
@@ -304,7 +328,7 @@ offpkg update self                 # check for new version and update offpkg bin
 
 ## System Architecture 📂
 
-`offpkg` isolates all data within your user home directory:
+`offpkg` isolates all data cleanly within your user home directory:
 
 ```
 ~/.offpkg/
@@ -314,14 +338,50 @@ offpkg update self                 # check for new version and update offpkg bin
 │   ├── bun/                 # .tgz tarballs from npm registry
 │   ├── uv/                  # .whl / .tar.gz archives from PyPI
 │   └── flutter/             # .tar.gz archives from pub.dev
+├── config.toml              # Active registries, network timeouts, and storage paths
 ├── db/
 │   └── offpkg.db            # Embedded SQLite catalog (packages, checksums, timestamps)
 ├── docs/
 │   ├── bun/                 # Editable package Markdown documentation
 │   ├── uv/
 │   └── flutter/
-└── stacks/                  # Custom user-defined TOML stack templates
+├── stacks/                  # Custom TOML stack definitions
+└── templates/               # Custom directory-based templates (with stack.toml)
 ```
+
+---
+
+## Configuration & Enterprise Registries ⚙️
+
+`offpkg` works out-of-the-box with official public registries. You can point it to corporate proxies, Artifactory, Nexus, or regional mirrors via `~/.offpkg/config.toml`:
+
+```toml
+[cache]
+path = "~/.offpkg/cache"
+max_size_gb = 50.0
+
+[network]
+timeout_secs = 30
+retries = 3
+
+[registries]
+npm = "https://registry.npmjs.org"       # e.g., https://registry.npmmirror.com or internal Nexus
+pypi = "https://pypi.org"               # e.g., https://internal-pypi.company.com
+pubdev = "https://pub.dev"              # e.g., https://pub.flutter-io.cn
+github_repo = "aswin402/offpkg"
+
+[runtimes]
+bun = "auto"
+uv = "auto"
+flutter = "auto"
+```
+
+### Environment Overrides
+
+You can also customize directory paths dynamically via environment variables:
+- `OFFPKG_HOME`: Base configuration directory (defaults to `~/.offpkg`).
+- `OFFPKG_TEMPLATES_DIR`: Directory for directory-based templates (defaults to `~/.offpkg/templates`).
+- `OFFPKG_STACKS_DIR`: Directory for custom TOML stacks (defaults to `~/.offpkg/stacks`).
 
 ---
 
