@@ -188,6 +188,20 @@ pub enum StackSubcommand {
         /// Stack name to delete
         name: String,
     },
+    /// Save current project as a reusable template/stack
+    #[command(alias = "export")]
+    Save {
+        /// Name for the new stack template
+        name: String,
+        /// Optional description of the template
+        #[arg(long, short = 'd')]
+        description: Option<String>,
+    },
+    /// Show filesystem path where templates or a specific stack are stored
+    Path {
+        /// Stack name (omit to show templates directory)
+        name: Option<String>,
+    },
 }
 
 // ── Docs ──────────────────────────────────────────────────────────────────────
@@ -377,6 +391,27 @@ mod tests {
                 subcmd: StackSubcommand::New
             })
         ));
+
+        let args = Args::try_parse_from(["offpkg", "stack", "save", "my-app"]).unwrap();
+        match args.command {
+            Some(Command::Stack {
+                subcmd: StackSubcommand::Save { name, description },
+            }) => {
+                assert_eq!(name, "my-app");
+                assert!(description.is_none());
+            }
+            _ => panic!("Expected Stack Save"),
+        }
+
+        let args = Args::try_parse_from(["offpkg", "stack", "path"]).unwrap();
+        match args.command {
+            Some(Command::Stack {
+                subcmd: StackSubcommand::Path { name },
+            }) => {
+                assert!(name.is_none());
+            }
+            _ => panic!("Expected Stack Path"),
+        }
     }
 
     #[test]

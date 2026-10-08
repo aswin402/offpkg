@@ -2,6 +2,7 @@ use crate::cache::{compute_sha256, Cache};
 use crate::config::Config;
 use crate::db::{Database, Package};
 use crate::docs::{fetch_docs, DocsStore};
+use crate::package_spec::PackageSpec;
 use crate::tui::{Label, TUI};
 use anyhow::{anyhow, Result};
 use std::fs;
@@ -27,26 +28,75 @@ impl BunAdapter {
         }
     }
 
-    pub async fn install(&mut self, pkg: &str) -> Result<()> {
+    pub async fn install(&mut self, pkg_spec_str: &str) -> Result<()> {
         let start = Instant::now();
+        let spec = PackageSpec::parse(pkg_spec_str, "bun")?;
+        let pkg = &spec.name;
 
         // ── Step 1: resolve version ───────────────────────────────────────
         let sp = self
             .tui
-            .spinner(&format!("resolving {} from npm registry...", pkg));
-        let url = format!("https://registry.npmjs.org/{}/latest", pkg);
-        let resp = reqwest::get(&url)
-            .await?
-            .json::<serde_json::Value>()
-            .await?;
-        let version = resp["version"]
-            .as_str()
-            .ok_or_else(|| anyhow!("No version for '{}'", pkg))?
-            .to_string();
-        let tarball_url = resp["dist"]["tarball"]
-            .as_str()
-            .ok_or_else(|| anyhow!("No tarball for '{}'", pkg))?
-            .to_string();
+            .spinner(&format!("resolving {} from npm registry...", pkg_spec_str));
+
+        let encoded_name = if pkg.starts_with('@') {
+            pkg.replace('/', "%2F")
+        } else {
+            pkg.to_string()
+        };
+
+        let (version, tarball_url) = if let Some(ref ver) = spec.version_req {
+            if !ver.contains('^') && !ver.contains('~') && !ver.contains('>') && !ver.contains('<') && !ver.contains('*') {
+                let url = format!("{}/{}/{}", self.config.registries.npm, encoded_name, ver);
+                let resp = reqwest::get(&url).await?.json::<serde_json::Value>().await?;
+                let resolved_ver = resp["version"]
+                    .as_str()
+                    .ok_or_else(|| anyhow!("Version '{}' not found for '{}'", ver, pkg))?
+                    .to_string();
+                let tarball = resp["dist"]["tarball"]
+                    .as_str()
+                    .ok_or_else(|| anyhow!("No tarball for '{}@{}'", pkg, ver))?
+                    .to_string();
+                (resolved_ver, tarball)
+            } else {
+                let url = format!("{}/{}", self.config.registries.npm, encoded_name);
+                let resp = reqwest::get(&url).await?.json::<serde_json::Value>().await?;
+                let versions_obj = resp["versions"]
+                    .as_object()
+                    .ok_or_else(|| anyhow!("No versions found for '{}'", pkg))?;
+                let req = semver::VersionReq::parse(ver).unwrap_or(semver::VersionReq::STAR);
+                let mut matching: Vec<semver::Version> = versions_obj
+                    .keys()
+                    .filter_map(|v| semver::Version::parse(v).ok())
+                    .filter(|v| req.matches(v))
+                    .collect();
+                matching.sort();
+                let best = matching
+                    .last()
+                    .ok_or_else(|| anyhow!("No matching version found for '{}@{}'", pkg, ver))?;
+                let best_str = best.to_string();
+                let tarball = resp["versions"][&best_str]["dist"]["tarball"]
+                    .as_str()
+                    .ok_or_else(|| anyhow!("No tarball for '{}@{}'", pkg, best_str))?
+                    .to_string();
+                (best_str, tarball)
+            }
+        } else {
+            let url = format!("{}/{}/latest", self.config.registries.npm, encoded_name);
+            let resp = reqwest::get(&url)
+                .await?
+                .json::<serde_json::Value>()
+                .await?;
+            let version = resp["version"]
+                .as_str()
+                .ok_or_else(|| anyhow!("No version for '{}'", pkg))?
+                .to_string();
+            let tarball_url = resp["dist"]["tarball"]
+                .as_str()
+                .ok_or_else(|| anyhow!("No tarball for '{}'", pkg))?
+                .to_string();
+            (version, tarball_url)
+        };
+
         sp.finish(
             Label::Resolve,
             &format!("{}@{}", pkg, version),
@@ -119,18 +169,27 @@ impl BunAdapter {
         Ok(())
     }
 
-    pub fn add(&mut self, pkg: &str, skip_config: bool, is_dev: bool) -> Result<()> {
+    pub fn add(&mut self, pkg_spec_str: &str, skip_config: bool, is_dev: bool) -> Result<()> {
         let start = Instant::now();
+        let spec = PackageSpec::parse(pkg_spec_str, "bun")?;
+        let pkg = &spec.name;
 
         // ── Step 1: resolve from cache ───────────────────────────────────
         let sp = self
             .tui
-            .spinner(&format!("resolving {} from offpkg cache...", pkg));
+            .spinner(&format!("resolving {} from offpkg cache...", pkg_spec_str));
         let latest = self
             .db
             .list_packages(Some("bun"))?
             .into_iter()
-            .filter(|p| p.name == pkg)
+            .filter(|p| p.name == *pkg)
+            .filter(|p| {
+                if let Some(ref req_ver) = spec.version_req {
+                    p.version == *req_ver || p.version.starts_with(req_ver.trim_start_matches('^'))
+                } else {
+                    true
+                }
+            })
             .max_by_key(|p| {
                 semver::Version::parse(&p.version).unwrap_or_else(|_| semver::Version::new(0, 0, 0))
             });
@@ -141,8 +200,8 @@ impl BunAdapter {
                 drop(sp);
                 return Err(anyhow!(
                     "'{}' not in offpkg cache.\nRun: offpkg bun install {}",
-                    pkg,
-                    pkg
+                    pkg_spec_str,
+                    pkg_spec_str
                 ));
             }
         };
@@ -151,7 +210,7 @@ impl BunAdapter {
             drop(sp);
             return Err(anyhow!(
                 "Cache file missing. Run: offpkg bun install {}",
-                pkg
+                pkg_spec_str
             ));
         }
 

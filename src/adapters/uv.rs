@@ -2,6 +2,7 @@ use crate::cache::{compute_sha256, Cache};
 use crate::config::Config;
 use crate::db::{Database, Package};
 use crate::docs::{fetch_docs, DocsStore};
+use crate::package_spec::PackageSpec;
 use crate::tui::{Label, TUI};
 use anyhow::{anyhow, Result};
 use std::path::Path;
@@ -27,17 +28,26 @@ impl UvAdapter {
         }
     }
 
-    pub fn add(&mut self, pkg: &str, skip_config: bool, _is_dev: bool) -> Result<()> {
+    pub fn add(&mut self, pkg_spec_str: &str, skip_config: bool, _is_dev: bool) -> Result<()> {
         let start = Instant::now();
+        let spec = PackageSpec::parse(pkg_spec_str, "uv")?;
+        let pkg = &spec.name;
 
         let sp = self
             .tui
-            .spinner(&format!("resolving {} from offpkg cache...", pkg));
+            .spinner(&format!("resolving {} from offpkg cache...", pkg_spec_str));
         let latest = self
             .db
             .list_packages(Some("uv"))?
             .into_iter()
-            .filter(|p| p.name == pkg)
+            .filter(|p| p.name == *pkg)
+            .filter(|p| {
+                if let Some(ref req_ver) = spec.version_req {
+                    p.version == *req_ver || p.version.starts_with(req_ver.trim_start_matches("=="))
+                } else {
+                    true
+                }
+            })
             .max_by_key(|p| {
                 semver::Version::parse(&p.version).unwrap_or_else(|_| semver::Version::new(0, 0, 0))
             });
@@ -48,8 +58,8 @@ impl UvAdapter {
                 drop(sp);
                 return Err(anyhow!(
                     "'{}' is not in the offpkg cache.\nRun: offpkg uv install {}",
-                    pkg,
-                    pkg
+                    pkg_spec_str,
+                    pkg_spec_str
                 ));
             }
         };
@@ -58,7 +68,7 @@ impl UvAdapter {
             drop(sp);
             return Err(anyhow!(
                 "Cache file missing. Re-run: offpkg uv install {}",
-                pkg
+                pkg_spec_str
             ));
         }
 
@@ -143,41 +153,39 @@ impl UvAdapter {
         Ok(())
     }
 
-    pub async fn install(&mut self, pkg: &str) -> Result<()> {
+    pub async fn install(&mut self, pkg_spec_str: &str) -> Result<()> {
         let start = Instant::now();
+        let spec = PackageSpec::parse(pkg_spec_str, "uv")?;
+        let pkg = &spec.name;
 
-        let sp = self.tui.spinner(&format!("resolving {} from PyPI...", pkg));
-        let url = format!("https://pypi.org/pypi/{}/json", pkg);
+        let sp = self.tui.spinner(&format!("resolving {} from PyPI...", pkg_spec_str));
+        let url = format!("{}/pypi/{}/json", self.config.registries.pypi, pkg);
         let resp = reqwest::get(&url)
             .await?
             .json::<serde_json::Value>()
             .await?;
-        let version = resp["info"]["version"]
-            .as_str()
-            .ok_or_else(|| anyhow!("No version in PyPI response for '{}'", pkg))?
-            .to_string();
 
-        let empty = vec![];
-        let urls = resp["urls"].as_array().unwrap_or(&empty);
-        let tarball_url = urls
-            .iter()
-            .find(|u| {
-                u["filename"]
-                    .as_str()
-                    .map(|f| f.ends_with(".whl"))
-                    .unwrap_or(false)
-            })
-            .or_else(|| {
-                urls.iter().find(|u| {
-                    u["filename"]
-                        .as_str()
-                        .map(|f| f.ends_with(".tar.gz"))
-                        .unwrap_or(false)
-                })
-            })
-            .and_then(|u| u["url"].as_str())
-            .ok_or_else(|| anyhow!("No downloadable file on PyPI for '{}'", pkg))?
-            .to_string();
+        let (version, tarball_url) = if let Some(ref ver) = spec.version_req {
+            let releases = resp["releases"]
+                .as_object()
+                .ok_or_else(|| anyhow!("No releases found for '{}'", pkg))?;
+            let ver_clean = ver.trim_start_matches("==").trim_start_matches(">=").trim();
+            if let Some(files) = releases.get(ver_clean).and_then(|f| f.as_array()) {
+                let download_url = select_pypi_download_url(files, pkg)?;
+                (ver_clean.to_string(), download_url)
+            } else {
+                return Err(anyhow!("Version '{}' not found on PyPI for '{}'", ver, pkg));
+            }
+        } else {
+            let version = resp["info"]["version"]
+                .as_str()
+                .ok_or_else(|| anyhow!("No version in PyPI response for '{}'", pkg))?
+                .to_string();
+            let empty = vec![];
+            let urls = resp["urls"].as_array().unwrap_or(&empty);
+            let download_url = select_pypi_download_url(urls, pkg)?;
+            (version, download_url)
+        };
 
         sp.finish(
             Label::Resolve,
@@ -304,6 +312,27 @@ impl UvAdapter {
         }
         Ok(())
     }
+}
+
+fn select_pypi_download_url(urls: &[serde_json::Value], pkg: &str) -> Result<String> {
+    urls.iter()
+        .find(|u| {
+            u["filename"]
+                .as_str()
+                .map(|f| f.ends_with(".whl"))
+                .unwrap_or(false)
+        })
+        .or_else(|| {
+            urls.iter().find(|u| {
+                u["filename"]
+                    .as_str()
+                    .map(|f| f.ends_with(".tar.gz"))
+                    .unwrap_or(false)
+            })
+        })
+        .and_then(|u| u["url"].as_str())
+        .ok_or_else(|| anyhow!("No downloadable file on PyPI for '{}'", pkg))
+        .map(|s| s.to_string())
 }
 
 pub(crate) fn parse_pyproject_deps(content: &str) -> Result<Vec<String>> {

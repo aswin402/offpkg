@@ -140,10 +140,28 @@ fn which_available(name: &str) -> bool {
 
 /// Fetch docs from registry README. Falls back to template.
 pub async fn fetch_docs(runtime: &str, pkg: &str, version: &str) -> Result<String> {
+    fetch_docs_with_registry(runtime, pkg, version, None).await
+}
+
+pub async fn fetch_docs_with_registry(
+    runtime: &str,
+    pkg: &str,
+    version: &str,
+    custom_registry: Option<&str>,
+) -> Result<String> {
     let result = match runtime {
-        "flutter" => fetch_pubdev_docs(pkg, version).await,
-        "bun" => fetch_npm_docs(pkg, version).await,
-        "uv" => fetch_pypi_docs(pkg, version).await,
+        "flutter" => {
+            let reg = custom_registry.unwrap_or("https://pub.dev");
+            fetch_pubdev_docs(reg, pkg, version).await
+        }
+        "bun" => {
+            let reg = custom_registry.unwrap_or("https://registry.npmjs.org");
+            fetch_npm_docs(reg, pkg, version).await
+        }
+        "uv" => {
+            let reg = custom_registry.unwrap_or("https://pypi.org");
+            fetch_pypi_docs(reg, pkg, version).await
+        }
         _ => Err(anyhow!("Unknown runtime")),
     };
     match result {
@@ -152,8 +170,8 @@ pub async fn fetch_docs(runtime: &str, pkg: &str, version: &str) -> Result<Strin
     }
 }
 
-async fn fetch_pubdev_docs(pkg: &str, version: &str) -> Result<String> {
-    let resp = reqwest::get(&format!("https://pub.dev/api/packages/{}", pkg))
+async fn fetch_pubdev_docs(registry: &str, pkg: &str, version: &str) -> Result<String> {
+    let resp = reqwest::get(&format!("{}/api/packages/{}", registry, pkg))
         .await?
         .json::<serde_json::Value>()
         .await?;
@@ -171,8 +189,8 @@ async fn fetch_pubdev_docs(pkg: &str, version: &str) -> Result<String> {
     let points = resp["pub_points"].as_i64().unwrap_or(0);
 
     let readme_resp = reqwest::get(&format!(
-        "https://pub.dev/api/packages/{}/versions/{}/readme",
-        pkg, version
+        "{}/api/packages/{}/versions/{}/readme",
+        registry, pkg, version
     ))
     .await;
 
@@ -213,8 +231,13 @@ async fn fetch_pubdev_docs(pkg: &str, version: &str) -> Result<String> {
     ))
 }
 
-async fn fetch_npm_docs(pkg: &str, version: &str) -> Result<String> {
-    let resp = reqwest::get(&format!("https://registry.npmjs.org/{}", pkg))
+async fn fetch_npm_docs(registry: &str, pkg: &str, version: &str) -> Result<String> {
+    let pkg_encoded = if pkg.starts_with('@') {
+        pkg.replacen('/', "%2F", 1)
+    } else {
+        pkg.to_string()
+    };
+    let resp = reqwest::get(&format!("{}/{}", registry, pkg_encoded))
         .await?
         .json::<serde_json::Value>()
         .await?;
@@ -249,8 +272,8 @@ async fn fetch_npm_docs(pkg: &str, version: &str) -> Result<String> {
     ))
 }
 
-async fn fetch_pypi_docs(pkg: &str, version: &str) -> Result<String> {
-    let resp = reqwest::get(&format!("https://pypi.org/pypi/{}/json", pkg))
+async fn fetch_pypi_docs(registry: &str, pkg: &str, version: &str) -> Result<String> {
+    let resp = reqwest::get(&format!("{}/pypi/{}/json", registry, pkg))
         .await?
         .json::<serde_json::Value>()
         .await?;

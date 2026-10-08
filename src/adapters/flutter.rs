@@ -2,6 +2,7 @@ use crate::cache::{compute_sha256, Cache};
 use crate::config::Config;
 use crate::db::{Database, Package};
 use crate::docs::{fetch_docs, DocsStore};
+use crate::package_spec::PackageSpec;
 use crate::tui::{Label, TUI};
 use anyhow::{anyhow, Result};
 use std::fs;
@@ -28,28 +29,88 @@ impl FlutterAdapter {
         }
     }
 
-    pub async fn install(&mut self, pkg: &str) -> Result<()> {
+    pub async fn install(&mut self, pkg_spec_str: &str) -> Result<()> {
         let start = Instant::now();
+        let spec = PackageSpec::parse(pkg_spec_str, "flutter")?;
+        let pkg = &spec.name;
 
         let sp = self
             .tui
-            .spinner(&format!("resolving {} from pub.dev...", pkg));
-        let url = format!("https://pub.dev/api/packages/{}", pkg);
+            .spinner(&format!("resolving {} from pub.dev...", pkg_spec_str));
+        let url = format!("{}/api/packages/{}", self.config.registries.pubdev, pkg);
         let resp = reqwest::get(&url)
             .await
             .map_err(|e| anyhow!("Failed to reach pub.dev: {}", e))?
             .json::<serde_json::Value>()
             .await?;
 
-        let version = resp["latest"]["version"]
-            .as_str()
-            .ok_or_else(|| anyhow!("No version on pub.dev for '{}'", pkg))?
-            .to_string();
+        let (version, archive_url) = if let Some(ref ver_req) = spec.version_req {
+            let versions = resp["versions"]
+                .as_array()
+                .ok_or_else(|| anyhow!("No versions found on pub.dev for '{}'", pkg))?;
 
-        let tarball_url = format!(
-            "https://pub.dev/packages/{}/versions/{}.tar.gz",
-            pkg, version
-        );
+            let clean_ver = ver_req
+                .trim_start_matches('^')
+                .trim_start_matches(':')
+                .trim_start_matches("==")
+                .trim();
+
+            let matched = versions.iter().rev().find(|v| {
+                v["version"]
+                    .as_str()
+                    .map(|ver| {
+                        if ver == clean_ver || ver.starts_with(clean_ver) {
+                            return true;
+                        }
+                        if let (Ok(parsed_v), Ok(parsed_req)) = (
+                            semver::Version::parse(ver),
+                            semver::VersionReq::parse(ver_req.trim_start_matches(':')),
+                        ) {
+                            parsed_req.matches(&parsed_v)
+                        } else {
+                            false
+                        }
+                    })
+                    .unwrap_or(false)
+            });
+
+            if let Some(v_obj) = matched {
+                let v_str = v_obj["version"].as_str().unwrap().to_string();
+                let arch = v_obj["archive_url"]
+                    .as_str()
+                    .map(|s| s.to_string())
+                    .unwrap_or_else(|| {
+                        format!(
+                            "{}/packages/{}/versions/{}.tar.gz",
+                            self.config.registries.pubdev, pkg, v_str
+                        )
+                    });
+                (v_str, arch)
+            } else {
+                return Err(anyhow!(
+                    "Version matching '{}' not found on pub.dev for '{}'",
+                    ver_req,
+                    pkg
+                ));
+            }
+        } else {
+            let version = resp["latest"]["version"]
+                .as_str()
+                .ok_or_else(|| anyhow!("No version on pub.dev for '{}'", pkg))?
+                .to_string();
+            let archive_url = resp["latest"]["archive_url"]
+                .as_str()
+                .map(|s| s.to_string())
+                .unwrap_or_else(|| {
+                    format!(
+                        "{}/packages/{}/versions/{}.tar.gz",
+                        self.config.registries.pubdev, pkg, version
+                    )
+                });
+            (version, archive_url)
+        };
+
+        let tarball_url = archive_url;
         sp.finish(
             Label::Resolve,
             &format!("{}@{}", pkg, version),
@@ -130,17 +191,27 @@ impl FlutterAdapter {
         Ok(())
     }
 
-    pub fn add(&mut self, pkg: &str, skip_config: bool, _is_dev: bool) -> Result<()> {
+    pub fn add(&mut self, pkg_spec_str: &str, skip_config: bool, _is_dev: bool) -> Result<()> {
         let start = Instant::now();
+        let spec = PackageSpec::parse(pkg_spec_str, "flutter")?;
+        let pkg = &spec.name;
 
         let sp = self
             .tui
-            .spinner(&format!("resolving {} from offpkg cache...", pkg));
+            .spinner(&format!("resolving {} from offpkg cache...", pkg_spec_str));
         let latest = self
             .db
             .list_packages(Some("flutter"))?
             .into_iter()
-            .filter(|p| p.name == pkg)
+            .filter(|p| p.name == *pkg)
+            .filter(|p| {
+                if let Some(ref req_ver) = spec.version_req {
+                    p.version == *req_ver
+                        || p.version.starts_with(req_ver.trim_start_matches('^').trim_start_matches(':'))
+                } else {
+                    true
+                }
+            })
             .max_by_key(|p| {
                 semver::Version::parse(&p.version).unwrap_or_else(|_| semver::Version::new(0, 0, 0))
             });
@@ -151,8 +222,8 @@ impl FlutterAdapter {
                 drop(sp);
                 return Err(anyhow!(
                     "'{}' not in cache. Run: offpkg flutter install {}",
-                    pkg,
-                    pkg
+                    pkg_spec_str,
+                    pkg_spec_str
                 ));
             }
         };
@@ -388,7 +459,7 @@ fn extract_tar_gz(tgz_path: &Path, dest_dir: &Path) -> Result<()> {
     Ok(())
 }
 
-fn parse_pubspec_deps(content: &str) -> Vec<String> {
+pub(crate) fn parse_pubspec_deps(content: &str) -> Vec<String> {
     let mut deps = vec![];
     let mut in_deps = false;
     for line in content.lines() {

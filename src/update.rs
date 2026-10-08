@@ -5,8 +5,13 @@ use crate::tui::{Label, TUI};
 use anyhow::{anyhow, Result};
 
 /// Check latest version from npm registry
-async fn latest_npm(pkg: &str) -> Result<(String, String)> {
-    let url = format!("https://registry.npmjs.org/{}/latest", pkg);
+async fn latest_npm(registry: &str, pkg: &str) -> Result<(String, String)> {
+    let pkg_encoded = if pkg.starts_with('@') {
+        pkg.replacen('/', "%2F", 1)
+    } else {
+        pkg.to_string()
+    };
+    let url = format!("{}/{}/latest", registry, pkg_encoded);
     let resp = reqwest::get(&url)
         .await?
         .json::<serde_json::Value>()
@@ -23,8 +28,8 @@ async fn latest_npm(pkg: &str) -> Result<(String, String)> {
 }
 
 /// Check latest version from PyPI
-async fn latest_pypi(pkg: &str) -> Result<(String, String)> {
-    let url = format!("https://pypi.org/pypi/{}/json", pkg);
+async fn latest_pypi(registry: &str, pkg: &str) -> Result<(String, String)> {
+    let url = format!("{}/pypi/{}/json", registry, pkg);
     let resp = reqwest::get(&url)
         .await?
         .json::<serde_json::Value>()
@@ -58,8 +63,8 @@ async fn latest_pypi(pkg: &str) -> Result<(String, String)> {
 }
 
 /// Check latest version from pub.dev
-async fn latest_pubdev(pkg: &str) -> Result<(String, String)> {
-    let url = format!("https://pub.dev/api/packages/{}", pkg);
+async fn latest_pubdev(registry: &str, pkg: &str) -> Result<(String, String)> {
+    let url = format!("{}/api/packages/{}", registry, pkg);
     let resp = reqwest::get(&url)
         .await?
         .json::<serde_json::Value>()
@@ -69,8 +74,8 @@ async fn latest_pubdev(pkg: &str) -> Result<(String, String)> {
         .ok_or_else(|| anyhow!("No version for '{}'", pkg))?
         .to_string();
     let tarball = format!(
-        "https://pub.dev/packages/{}/versions/{}.tar.gz",
-        pkg, version
+        "{}/packages/{}/versions/{}.tar.gz",
+        registry, pkg, version
     );
     Ok((version, tarball))
 }
@@ -81,13 +86,14 @@ pub async fn update_package(
     tui: &mut TUI,
     db: &Database,
     cache: &Cache,
+    config: &Config,
     pkg: &Package,
 ) -> Result<bool> {
     // Check latest version from registry
     let (latest_version, tarball_url) = match pkg.runtime.as_str() {
-        "bun" => latest_npm(&pkg.name).await?,
-        "uv" => latest_pypi(&pkg.name).await?,
-        "flutter" => latest_pubdev(&pkg.name).await?,
+        "bun" => latest_npm(&config.registries.npm, &pkg.name).await?,
+        "uv" => latest_pypi(&config.registries.pypi, &pkg.name).await?,
+        "flutter" => latest_pubdev(&config.registries.pubdev, &pkg.name).await?,
         _ => return Err(anyhow!("Unknown runtime: {}", pkg.runtime)),
     };
 
@@ -153,7 +159,7 @@ pub async fn run_update(
     tui: &mut TUI,
     db: &Database,
     cache: &Cache,
-    _config: &Config,
+    config: &Config,
     pkg_filter: Option<&str>,
     runtime_filter: Option<&str>,
 ) -> Result<()> {
@@ -192,7 +198,7 @@ pub async fn run_update(
     let mut failed: Vec<String> = vec![];
 
     for pkg in &targets {
-        match update_package(tui, db, cache, pkg).await {
+        match update_package(tui, db, cache, config, pkg).await {
             Ok(true) => updated += 1,
             Ok(false) => up_to_date += 1,
             Err(e) => {
@@ -231,7 +237,7 @@ pub async fn run_update(
 }
 
 /// Check if an updated version of offpkg exists on GitHub and run updater if needed
-pub async fn run_self_update(tui: &mut TUI, force: bool) -> Result<()> {
+pub async fn run_self_update(tui: &mut TUI, config: &Config, force: bool) -> Result<()> {
     tui.render_logo();
     tui.print_line(Label::Info, "checking for offpkg updates...", None);
 
@@ -240,9 +246,11 @@ pub async fn run_self_update(tui: &mut TUI, force: bool) -> Result<()> {
         .map_err(|e| anyhow!("Failed to parse current version: {}", e))?;
 
     let client = reqwest::Client::builder().user_agent("offpkg").build()?;
+    let repo = &config.registries.github_repo;
 
+    let remote_url = format!("https://raw.githubusercontent.com/{}/main/Cargo.toml", repo);
     let remote_ver_str = match client
-        .get("https://raw.githubusercontent.com/aswin402/offpkg/main/Cargo.toml")
+        .get(&remote_url)
         .send()
         .await
     {
@@ -292,9 +300,13 @@ pub async fn run_self_update(tui: &mut TUI, force: bool) -> Result<()> {
         );
     }
 
+    let script_cmd = format!(
+        "curl -fsSL https://raw.githubusercontent.com/{}/main/update_offpkg.sh | bash",
+        repo
+    );
     let status = std::process::Command::new("sh")
         .arg("-c")
-        .arg("curl -fsSL https://raw.githubusercontent.com/aswin402/offpkg/main/update_offpkg.sh | bash")
+        .arg(&script_cmd)
         .status()
         .map_err(|e| anyhow!("Failed to run updater script: {}", e))?;
 

@@ -4,6 +4,7 @@ pub mod config;
 pub mod db;
 pub mod docs;
 pub mod doctor;
+pub mod package_spec;
 pub mod remove;
 pub mod stacks;
 pub mod tui;
@@ -255,7 +256,7 @@ async fn main() -> Result<()> {
                 // Write config files
                 println!();
                 tui.print_line(Label::Cache, "writing config files", None);
-                let created = stack_store.write_files(&stack, &cwd)?;
+                let created = stack_store.write_files_with_db(&stack, &cwd, Some(&db))?;
                 for f in &created {
                     tui.print_line(Label::Link, f, Some("created"));
                 }
@@ -366,6 +367,55 @@ async fn main() -> Result<()> {
                     tui.print_line(Label::Error, &e.to_string(), None);
                 }
             },
+
+            StackSubcommand::Save { name, description } => {
+                tui.render_logo();
+                let cwd = std::env::current_dir()?;
+                let sp = tui.spinner(&format!("saving project as template '{}'...", name));
+                match stack_store.save_from_project(&name, description.as_deref(), &cwd) {
+                    Ok(path) => {
+                        sp.finish(
+                            Label::Done,
+                            &format!("saved template '{}'", name),
+                            Some(&path.to_string_lossy()),
+                        );
+                        tui.print_line(
+                            Label::Info,
+                            "use in any project:",
+                            Some(&format!("offpkg stack add {}", name)),
+                        );
+                    }
+                    Err(e) => {
+                        drop(sp);
+                        tui.print_line(Label::Error, "failed to save template", Some(&e.to_string()));
+                        return Err(e);
+                    }
+                }
+            }
+
+            StackSubcommand::Path { name } => {
+                tui.render_logo();
+                if let Some(stack_name) = name {
+                    if let Some(path) = stack_store.template_path(&stack_name) {
+                        tui.print_line(Label::Info, &stack_name, Some(&path.to_string_lossy()));
+                    } else if stack_store.find(&stack_name).is_some() {
+                        tui.print_line(Label::Info, &stack_name, Some("built-in compiled template"));
+                    } else {
+                        tui.print_line(Label::Error, "stack not found", Some(&stack_name));
+                    }
+                } else {
+                    tui.print_line(
+                        Label::Info,
+                        "templates directory",
+                        Some(&stack_store.templates_dir().to_string_lossy()),
+                    );
+                    tui.print_line(
+                        Label::Info,
+                        "custom stacks directory",
+                        Some(&stack_store.custom_dir().to_string_lossy()),
+                    );
+                }
+            }
         },
 
         // ── Docs ──────────────────────────────────────────────────────────
@@ -599,7 +649,7 @@ async fn main() -> Result<()> {
         },
 
         Command::SelfUpdate { force } => {
-            run_self_update(&mut tui, force).await?;
+            run_self_update(&mut tui, &config, force).await?;
         }
 
         Command::Update {
@@ -608,7 +658,7 @@ async fn main() -> Result<()> {
             self_update,
         } => {
             if self_update || pkg.as_deref() == Some("self") || pkg.as_deref() == Some("offpkg") {
-                run_self_update(&mut tui, false).await?;
+                run_self_update(&mut tui, &config, false).await?;
             } else {
                 let all_pkgs = db.list_packages(runtime.as_deref())?;
                 if all_pkgs.is_empty() && pkg.is_none() {
@@ -617,7 +667,7 @@ async fn main() -> Result<()> {
                         "no cached packages found in catalog",
                         Some("checking for offpkg self-updates..."),
                     );
-                    run_self_update(&mut tui, false).await?;
+                    run_self_update(&mut tui, &config, false).await?;
                 } else {
                     run_update(
                         &mut tui,
