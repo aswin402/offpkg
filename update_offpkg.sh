@@ -3,7 +3,7 @@ set -e
 
 # ── offpkg self-updater ───────────────────────────────────────────────────────
 
-INSTALL_DIR="$HOME/.offpkg/bin"
+INSTALL_DIR="${INSTALL_DIR:-$HOME/.offpkg/bin}"
 BINARY="offpkg"
 REPO="https://github.com/aswin402/offpkg"
 RAW_CARGO="https://raw.githubusercontent.com/aswin402/offpkg/main/Cargo.toml"

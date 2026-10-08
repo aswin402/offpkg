@@ -3,7 +3,7 @@ $ErrorActionPreference = "Stop"
 
 $Repo = "https://github.com/aswin402/offpkg"
 $BinaryName = "offpkg.exe"
-$InstallDir = Join-Path $env:USERPROFILE ".offpkg\bin"
+$InstallDir = if ($env:INSTALL_DIR) { $env:INSTALL_DIR } else { Join-Path $env:USERPROFILE ".offpkg\bin" }
 $BinaryPath = Join-Path $InstallDir $BinaryName
 
 function Print-Logo {

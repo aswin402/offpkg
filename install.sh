@@ -5,7 +5,7 @@ set -e
 
 REPO="https://github.com/aswin402/offpkg"
 BINARY="offpkg"
-INSTALL_DIR="$HOME/.offpkg/bin"
+INSTALL_DIR="${INSTALL_DIR:-$HOME/.offpkg/bin}"
 CYAN="\033[38;2;0;212;224m"
 GREEN="\033[38;2;0;229;160m"
 AMBER="\033[38;2;245;166;35m"
