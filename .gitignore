@@ -22,7 +22,6 @@ offpkg-windows-*
 
 # ── Rust build output ─────────────────────────────────────────────
 /target/
-Cargo.lock
 
 justfile
 
