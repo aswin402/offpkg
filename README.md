@@ -1,9 +1,9 @@
 <p align="center">
   <a href="https://github.com/aswin402/offpkg">
     <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="docs/logo-dark.svg">
-      <source media="(prefers-color-scheme: light)" srcset="docs/logo-light.svg">
-      <img src="docs/logo.svg" alt="offpkg - Universal Offline Package Manager" width="100%" />
+      <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/aswin402/offpkg/main/docs/logo-dark.svg">
+      <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/aswin402/offpkg/main/docs/logo-light.svg">
+      <img src="https://raw.githubusercontent.com/aswin402/offpkg/main/docs/logo.svg" alt="offpkg - Universal Offline Package Manager" width="100%" />
     </picture>
   </a>
 </p>
@@ -128,6 +128,9 @@ npm install -g github:aswin402/offpkg
 
 # Or run ephemerally with npx
 npx github:aswin402/offpkg doctor
+
+# Or run with Docker (GitHub Container Registry)
+docker run --rm -it -v $(pwd):/workspace ghcr.io/aswin402/offpkg doctor
 ```
 
 ---
