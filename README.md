@@ -1,10 +1,7 @@
 <p align="center">
   <a href="https://github.com/aswin402/offpkg">
-    <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/aswin402/offpkg/main/docs/logo-dark.svg">
-      <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/aswin402/offpkg/main/docs/logo-light.svg">
-      <img src="https://raw.githubusercontent.com/aswin402/offpkg/main/docs/logo.svg" alt="offpkg - Universal Offline Package Manager" width="100%" />
-    </picture>
+    <img src="https://raw.githubusercontent.com/aswin402/offpkg/main/docs/logo-dark.svg#gh-dark-mode-only" alt="offpkg - Universal Offline Package Manager" width="100%" />
+    <img src="https://raw.githubusercontent.com/aswin402/offpkg/main/docs/logo-light.svg#gh-light-mode-only" alt="offpkg - Universal Offline Package Manager" width="100%" />
   </a>
 </p>
 
